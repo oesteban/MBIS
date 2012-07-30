@@ -1,0 +1,5 @@
+// CMake variables configured for MBIS
+// do not modify this file
+#define MBIS_VERSION_MAJOR @MBIS_VERSION_MAJOR@
+#define MBIS_VERSION_MINOR @MBIS_VERSION_MINOR@
+#define MBIS_RELEASE "@MBIS_RELEASE@"

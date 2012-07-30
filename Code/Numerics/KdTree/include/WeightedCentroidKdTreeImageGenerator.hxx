@@ -1,0 +1,252 @@
+/*=========================================================================
+ *
+ *  Copyright Insight Software Consortium
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0.txt
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *=========================================================================*/
+#ifndef __itkWeightedCentroidKdTreeImageGenerator_hxx
+#define __itkWeightedCentroidKdTreeImageGenerator_hxx
+
+#include "WeightedCentroidKdTreeImageGenerator.h"
+
+namespace itk
+{
+namespace Statistics
+{
+template< class TImage, class TMask >
+WeightedCentroidKdTreeImageGenerator< TImage, TMask >
+::WeightedCentroidKdTreeImageGenerator()
+{
+  m_BucketSize = 16;
+  m_Subsample = SubsampleType::New();
+  m_MeasurementVectorSize = 0;
+}
+
+template< class TImage, class TMask >
+void
+WeightedCentroidKdTreeImageGenerator< TImage, TMask >
+::SetBucketSize(size_t size)
+{
+  m_BucketSize = size;
+}
+
+
+template< class TImage, class TMask >
+inline typename WeightedCentroidKdTreeImageGenerator< TImage, TMask >::KdTreeNodeType *
+WeightedCentroidKdTreeImageGenerator< TImage, TMask >
+::GenerateTreeLoop(size_t beginIndex,
+                   size_t endIndex,
+                   MeasurementVectorType & lowerBound,
+                   MeasurementVectorType & upperBound,
+                   size_t level)
+{
+  if ( endIndex - beginIndex <= m_BucketSize )
+    {
+    // numberOfInstances small, make a terminal node
+    if ( endIndex == beginIndex )
+      {
+      // return the pointer to empty terminal node
+      return m_Tree->GetEmptyTerminalNode();
+      }
+    else
+      {
+      KdTreeTerminalNode< SubsampleType > *ptr = new KdTreeTerminalNode< SubsampleType >();
+
+      for ( size_t j = beginIndex; j < endIndex; j++ )
+        {
+        ptr->AddInstanceIdentifier(
+          this->GetSubsample()->GetInstanceIdentifier(j) );
+        }
+
+      // return a terminal node
+      return ptr;
+      }
+    }
+  else
+    {
+    return this->GenerateNonterminalNode(beginIndex, endIndex,
+                                         lowerBound, upperBound, level + 1);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+template< class TImage, class TMask >
+void
+WeightedCentroidKdTreeImageGenerator< TImage, TMask >
+::Update() {
+	m_Subsample = SubsampleType::New();
+	m_Subsample->SetImage( m_InputImage );
+
+	// Prepare mask for filters
+	if( m_MaskImage.IsNotNull() ) {
+		m_Subsample->SetMask( m_MaskImage );
+	}
+
+	m_Subsample->Initialize();
+
+	if ( this->m_Tree.IsNull() )
+	  {
+	  this->m_Tree = KdTreeType::New();
+	  this->m_Tree->SetSample(m_Subsample);
+	  this->m_Tree->SetBucketSize(this->m_BucketSize);
+	  }
+	this->m_MeasurementVectorSize = m_Subsample->GetMeasurementVectorSize();
+
+	MeasurementVectorType lowerBound;
+	NumericTraits<MeasurementVectorType>::SetLength(lowerBound, this->m_MeasurementVectorSize);
+	MeasurementVectorType upperBound;
+	NumericTraits<MeasurementVectorType>::SetLength(upperBound, this->m_MeasurementVectorSize);
+
+	for ( size_t d = 0; d < this->m_MeasurementVectorSize; d++ )
+	  {
+	  lowerBound[d] = NumericTraits< MeasurementType >::NonpositiveMin();
+	  upperBound[d] = NumericTraits< MeasurementType >::max();
+	  }
+
+	KdTreeNodeType *root =
+	  this->GenerateTreeLoop(0, m_Subsample->Size(), lowerBound, upperBound, 0);
+	this->m_Tree->SetRoot(root);
+}
+
+template< class TImage, class TMask >
+void
+WeightedCentroidKdTreeImageGenerator< TImage, TMask >
+::PrintSelf(std::ostream & os, Indent indent) const
+{
+  Superclass::PrintSelf(os, indent);
+
+
+  os << indent << "Bucket Size: " << m_BucketSize << std::endl;
+  os << indent << "MeasurementVectorSize: "
+     << m_MeasurementVectorSize << std::endl;
+}
+
+template< class TImage, class TMask >
+inline typename WeightedCentroidKdTreeImageGenerator< TImage, TMask >::KdTreeNodeType *
+WeightedCentroidKdTreeImageGenerator< TImage, TMask >
+::GenerateNonterminalNode(size_t beginIndex,
+                          size_t endIndex,
+                          MeasurementVectorType & lowerBound,
+                          MeasurementVectorType & upperBound,
+                          size_t level)
+{
+  MeasurementType dimensionLowerBound;
+  MeasurementType dimensionUpperBound;
+  MeasurementType partitionValue;
+  size_t    partitionDimension = 0;
+  size_t    i;
+  size_t    j;
+  MeasurementType spread;
+  MeasurementType maxSpread;
+  size_t    medianIndex;
+
+
+  // Sanity check. Verify that the subsample has measurement vectors of the
+  // same length as the sample generated by the tree.
+  if ( this->GetMeasurementVectorSize() != m_Subsample->GetMeasurementVectorSize() )
+    {
+    itkExceptionMacro(<< "Measurement Vector Length mismatch");
+    }
+
+  // calculates the weighted centroid which is the vector sum
+  // of all the associated instances.
+  typename KdTreeNodeType::CentroidType weightedCentroid;
+  NumericTraits<typename KdTreeNodeType::CentroidType>::SetLength( weightedCentroid,
+    this->GetMeasurementVectorSize() );
+  MeasurementVectorType tempVector;
+  weightedCentroid.Fill(NumericTraits< MeasurementType >::Zero);
+
+  for ( i = beginIndex; i < endIndex; i++ )
+    {
+    tempVector = m_Subsample->GetMeasurementVectorByIndex(i);
+    for ( j = 0; j < this->GetMeasurementVectorSize(); j++ )
+      {
+      weightedCentroid[j] += tempVector[j];
+      }
+    }
+
+  // find most widely spread dimension
+  Algorithm::FindSampleBoundAndMean< SubsampleType >(this->GetSubsample(),
+                                                     beginIndex, endIndex,
+                                                     m_TempLowerBound, m_TempUpperBound,
+                                                     m_TempMean);
+
+  maxSpread = NumericTraits< MeasurementType >::NonpositiveMin();
+  for ( i = 0; i < this->GetMeasurementVectorSize(); i++ )
+    {
+    spread = m_TempUpperBound[i] - m_TempLowerBound[i];
+    if ( spread >= maxSpread )
+      {
+      maxSpread = spread;
+      partitionDimension = i;
+      }
+    }
+
+  medianIndex = ( endIndex - beginIndex ) / 2;
+
+  //
+  // Find the medial element by using the NthElement function
+  // based on the STL implementation of the QuickSelect algorithm.
+  //
+  partitionValue =
+    Algorithm::NthElement< SubsampleType >(this->GetSubsample(),
+                                           partitionDimension,
+                                           beginIndex, endIndex,
+                                           medianIndex);
+
+  medianIndex += beginIndex;
+
+  // save bounds for cutting dimension
+  dimensionLowerBound = lowerBound[partitionDimension];
+  dimensionUpperBound = upperBound[partitionDimension];
+
+  upperBound[partitionDimension] = partitionValue;
+  const size_t beginLeftIndex = beginIndex;
+  const size_t endLeftIndex   = medianIndex;
+  KdTreeNodeType *   left = this->GenerateTreeLoop(beginLeftIndex, endLeftIndex, lowerBound, upperBound, level + 1);
+  upperBound[partitionDimension] = dimensionUpperBound;
+
+  lowerBound[partitionDimension] = partitionValue;
+  const size_t beginRightIndex = medianIndex + 1;
+  const size_t endRighIndex    = endIndex;
+  KdTreeNodeType *   right = this->GenerateTreeLoop(beginRightIndex, endRighIndex, lowerBound, upperBound, level + 1);
+  lowerBound[partitionDimension] = dimensionLowerBound;
+
+  KdTreeNonterminalNodeType *nonTerminalNode =
+    new KdTreeNonterminalNodeType(partitionDimension,
+                                  partitionValue,
+                                  left, right,
+                                  weightedCentroid,
+                                  endIndex - beginIndex);
+
+  nonTerminalNode->AddInstanceIdentifier(
+    m_Subsample->GetInstanceIdentifier(medianIndex) );
+
+  return nonTerminalNode;
+}
+} // end of namespace Statistics
+} // end of namespace itk
+
+#endif
