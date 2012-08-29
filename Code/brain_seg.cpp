@@ -327,46 +327,58 @@ int main(int argc, char **argv) {
 	}
 
 
+	unsigned int init_mode = modes_map[s_mode];
 	unsigned int nComponents = input.size();
 	unsigned int nElements = nComponents * (1+nComponents);
 
-	for (vector<string>::iterator it = priors.begin(); it != priors.end(); it++) {
-		ProbabilityImageReader::Pointer r = ProbabilityImageReader::New();
-		r->SetFileName( *it );
-		ProbabilityImageType::ConstPointer p = r->GetOutput();
-		r->Update();
+	if( priors.size() > 0 ) {
+		if (init_mode== KMEANS ) init_mode = MANUAL;
+		if (init_mode == KMEANS_EM ) init_mode = EM;
 
-		StatisticsImageFilterType::Pointer calc = StatisticsImageFilterType::New();
-		calc->SetInput(p);
-		calc->Update();
-		ProbabilityPixelType max = calc->GetMaximum();
+		for (vector<string>::iterator it = priors.begin(); it != priors.end(); it++) {
+			ProbabilityImageReader::Pointer r = ProbabilityImageReader::New();
+			r->SetFileName( *it );
+			ProbabilityImageType::ConstPointer p = r->GetOutput();
+			r->Update();
 
-		if (max > 1.0 ){
-			ProbabilityPixelType min = calc->GetMinimum();
+			StatisticsImageFilterType::Pointer calc = StatisticsImageFilterType::New();
+			calc->SetInput(p);
+			calc->Update();
+			ProbabilityPixelType max = calc->GetMaximum();
 
-			IntensityWindowingImageFilterType::Pointer intensityFilter = IntensityWindowingImageFilterType::New();
-			intensityFilter->SetInput( p );
-			intensityFilter->SetWindowMaximum( max );
-			intensityFilter->SetWindowMinimum( min );
-			intensityFilter->SetOutputMaximum( 1.0 );
-			intensityFilter->SetOutputMinimum( 0.0 );
-			intensityFilter->Update();
-			p = intensityFilter->GetOutput();
+			if (max > 1.0 ){
+				ProbabilityPixelType min = calc->GetMinimum();
+
+				IntensityWindowingImageFilterType::Pointer intensityFilter = IntensityWindowingImageFilterType::New();
+				intensityFilter->SetInput( p );
+				intensityFilter->SetWindowMaximum( max );
+				intensityFilter->SetWindowMinimum( min );
+				intensityFilter->SetOutputMaximum( 1.0 );
+				intensityFilter->SetOutputMinimum( 0.0 );
+				intensityFilter->Update();
+				p = intensityFilter->GetOutput();
+			}
+			atlas.push_back(p);
+
+			std::cout << "\t* Prior [" << std::setw(2) << atlas.size() << "] read: " << (*it) << std::endl;
+
+			ParameterEstimator::Pointer est = ParameterEstimator::New();
+			est->SetInputVector( input );
+			est->SetPrior( p );
+			if ( bm.IsNotNull() ) {
+				est->SetMaskImage( bm );
+			}
+
+			est->Update();
+			initialParameters.push_back( est->GetOutputParameters() );
 		}
-		atlas.push_back(p);
-
-		std::cout << "\t* Prior [" << std::setw(2) << atlas.size() << "] read: " << (*it) << std::endl;
-
-		ParameterEstimator::Pointer est = ParameterEstimator::New();
-		est->SetInputVector( input );
-		est->SetPrior( p );
-		est->Update();
-		initialParameters.push_back( est->GetOutputParameters() );
 	}
 
 	if ( bfs::exists(initFile)) {
-		std::cout << "\t* Parsing tissue parameters file: " << initFile << std::endl;
+		if (init_mode== KMEANS ) init_mode = MANUAL;
+		if (init_mode == KMEANS_EM ) init_mode = EM;
 
+		std::cout << "\t* Parsing tissue parameters file: " << initFile << std::endl;
 		initialParameters = ReadParametersFile(initFile);
 
 		for ( ParametersVectorType::iterator it = initialParameters.begin(); it!=initialParameters.end(); it++) {
@@ -413,8 +425,6 @@ int main(int argc, char **argv) {
 
 		useFile = true;
 	}
-
-	unsigned int init_mode = modes_map[s_mode];
 
 	EMFilter::Pointer em_filter;
 	KMeansFilter::Pointer kmeans;
