@@ -22,7 +22,7 @@ def loadParameters( fname ):
     # Return arrays
     return ( mu, sigma )
 
-def distancePV ( sample, mask, params_tissue1, params_tissue2, distance='euclidean' ):
+def distancePV ( sample, mask, params_tissue1, params_tissue2, distance ):
     from scipy.spatial.distance import mahalanobis,euclidean
     import numpy as np
 

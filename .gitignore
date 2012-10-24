@@ -1,3 +1,4 @@
 /Documentation/Papers
 .fuse_hidden*
 *.pyc
+.*.swp

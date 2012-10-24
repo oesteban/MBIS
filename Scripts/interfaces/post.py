@@ -27,19 +27,20 @@ class PVProcess(BaseInterface):
     def _run_interface(self, runtime):
         params = pp.loadParameters(self.inputs.parameters)
 
-        _, base, _ = split_filename( self.inputs.in_maps[0] )
+        path, base, _ = split_filename( self.inputs.in_maps[0] )
 
         self._fnames = pp.fusePV( self.inputs.in_files,
                                self.inputs.in_maps,
                                params,
-                               self.inputs.distance,
+                               self.inputs.pure_tissues,
+                               self.inputs.dist,
                                self.inputs.reorder,
-                               os.path.abspath( base ) )
+                               os.path.abspath( os.path.join( path, base ) ) )
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        _, base, _ = split_filename( self.inputs.in_maps[0] )
-        outputs["out_files"] = [ '%s_mseg%02d.nii.gz' % ( base, i ) for i in range(0,len(self.inputs.pure_tissues)) ]
+        path, base, _ = split_filename( self.inputs.in_maps[0] )
+        outputs["out_files"] = [ '%s_mseg%02d.nii.gz' % ( os.path.join(path,base), i ) for i in range(0,len(self.inputs.pure_tissues)) ]
         return outputs
