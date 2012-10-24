@@ -100,7 +100,7 @@ class MBISInputSpec( CommandLineInputSpec ):
 class MBISOutputSpec( TraitedSpec ):
     out_classified = File(desc='path/name of binary segmented volume file' \
                             ' one val for each class  _mrf')
-    out_parameters = traits.List() 
+    out_parameters = traits.File(desc='csv file with tissue purameters') 
     bias_field = OutputMultiPath(File(desc='Estimated bias field _bias'))
     probability_maps = OutputMultiPath(File(desc='filenames, one for each class, for each ' \
                                 'input, mrf_x'))
@@ -157,7 +157,8 @@ class MBIS(CommandLine):
 
         if isdefined(self.inputs.output_stats):
             fname= outprefix + '_stats_final' + self.inputs.output_stats
-            outputs['out_parameters'] = np.loadtxt( fname, delimiter='[],' )
+            outputs['out_parameters'] = fname
+#            outputs['out_parameters'] = np.loadtxt( fname, delimiter='[],' )
 #            with open( self.inputs.output_stats ) as csvfile:
 #                dataReader = csv.reader( csvfile )
 #                outputs['out_parameters'] = np.array( [ [ row ] for row in dataReader ] )
