@@ -21,7 +21,7 @@ from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
 from nipype.utils.filemanip import split_filename,fname_presuffix
 
 from nibabel import load
-
+#import csv
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -38,8 +38,8 @@ class MBISInputSpec( CommandLineInputSpec ):
 
     mask_auto = traits.Bool( desc='channels are implicitly masked', argstr='-M' )
 
-    out_prefix = File(desc='base name of output files',
-                        argstr='-o %s')  # uses in_file name as basename if none given
+    out_prefix = File('outpath', desc='base name of output files',
+                        argstr='-o %s', genfile=True)  # uses in_file name as basename if none given
 
     number_classes = traits.Range(low=2, high=10, argstr='-n %d',
                                   desc='number of tissue-type classes', value=3)
@@ -54,6 +54,8 @@ class MBISInputSpec( CommandLineInputSpec ):
     output_biascorrected = traits.Bool(desc='output restored image ' \
                                            '(bias-corrected image)',
                                        argstr='--bias-corrected-output')
+
+    output_stats = File( 'outcsvfile', desc='output file containing mixture parameters', argstr='--output-stats %s' )
 
     probability_maps = traits.Bool(desc='outputs a separate binary image for each ' \
                                'tissue type',
@@ -96,10 +98,9 @@ class MBISInputSpec( CommandLineInputSpec ):
 
 
 class MBISOutputSpec( TraitedSpec ):
-    out_classified = File(exists=True,
-                            desc='path/name of binary segmented volume file' \
+    out_classified = File(desc='path/name of binary segmented volume file' \
                             ' one val for each class  _mrf')
- 
+    out_parameters = traits.List() 
     bias_field = OutputMultiPath(File(desc='Estimated bias field _bias'))
     probability_maps = OutputMultiPath(File(desc='filenames, one for each class, for each ' \
                                 'input, mrf_x'))
@@ -132,39 +133,51 @@ class MBIS(CommandLine):
             nclasses = 3
         else:
             nclasses = self.inputs.number_classes
-        # when using multichannel, results basename is based on last
-        # input filename
-        if isdefined(self.inputs.out_prefix):
-            basefile = self.inputs.out_prefix
-        else:
-            basefile = ''
 
-        outputs['out_classified'] = self._gen_fname(basefile,
-                                                      suffix='_mrf')
+        outprefix = self._getdefaultprefix() 
+
+        outputs['out_classified'] = '%s_mrf.nii.gz' % outprefix
+
         if self.inputs.probability_maps:
             outputs['probability_maps'] = []
-            for  i in range(nclasses):
-                outputs['probability_maps'].append(
-                        self._gen_fname(basefile, suffix='_mrf_seg%02d' % i))
+            for  i in range(1,nclasses+1):
+                outputs['probability_maps'].append('%s_mrf_seg%02d.nii.gz' % (outprefix,i) )
 
         if isdefined(self.inputs.output_biascorrected):
             outputs['restored_image'] = []
             for val, f in enumerate(self.inputs.in_files):
                  # image numbering is 1-based
-                 outputs['restored_image'].append(
-                         self._gen_fname(basefile, suffix='_corrected_ch%02d' % (val + 1)))
-
+                 outputs['restored_image'].append('%s_corrected_ch%02d.nii.gz' % (outprefix,val+1) )
 
         if self.inputs.output_biasfield:
             outputs['bias_field'] = []
             for val, f in enumerate(self.inputs.in_files):
                 # image numbering is 1-based
-                outputs['bias_field'].append(
-                        self._gen_fname(basefile, suffix='_bias_ch%02d' % (val + 1)))
+                outputs['bias_field'].append('%s_bias_ch%02d.nii.gz' % (outprefix,val+1) )
+
+        if isdefined(self.inputs.output_stats):
+            fname= outprefix + '_stats_final' + self.inputs.output_stats
+            outputs['out_parameters'] = np.loadtxt( fname, delimiter='[],' )
+#            with open( self.inputs.output_stats ) as csvfile:
+#                dataReader = csv.reader( csvfile )
+#                outputs['out_parameters'] = np.array( [ [ row ] for row in dataReader ] )
+#		csvfile.close()
+
         return outputs
 
+    def _getdefaultprefix( self, name='mbis' ):
+       if not isdefined(self.inputs.out_prefix):
+           return os.path.abspath( os.path.join( os.getcwd(), name ) )
+       else:
+           return self.inputs.out_prefix
 
-    def _gen_fname(self, prefix, suffix=None, ext='.nii.gz' ):
+    def _gen_filename(self,name):
+        if name == 'out_prefix':
+            return self._getdefaultprefix()
+        return None
+		
+
+    def _gen_fname(self, prefix, suffix=None, ext='.nii.gz', cwd=None):
         """Generate a filename based on the given parameters.
 
         The filename will take the form: preffix<suffix><ext>.
@@ -190,6 +203,9 @@ class MBIS(CommandLine):
             prefix = './'
         if suffix is None:
             suffix = ''
+        if cwd is None:
+            cwd = os.getcwd()
+
         suffix = ''.join((suffix,ext))
-        fname = fname_presuffix(prefix, suffix=suffix, use_ext=False)
+        fname = fname_presuffix(prefix, suffix=suffix, use_ext=False, newpath=cwd )
         return fname
