@@ -74,6 +74,7 @@ MultispectralKMeansFilter< TInputComponent, TMaskImage>
 template <class TInputComponent, class TMaskImage>
 void MultispectralKMeansFilter< TInputComponent, TMaskImage>
 ::Compute() {
+	Superclass::GenerateData();
     itk::TimeProbe clock;
 
 	m_NumberOfComponents = this->GetInputVectorImage()->GetNumberOfComponentsPerPixel();
@@ -204,8 +205,6 @@ void MultispectralKMeansFilter< TInputComponent, TMaskImage>
 template <class TInputComponent, class TMaskImage>
 void MultispectralKMeansFilter< TInputComponent, TMaskImage>
 ::GenerateData() {
-	Superclass::GenerateData();
-
 	if( m_OutputParameters.size() == 0 ) this->Compute();
 
     typename DecisionRuleType::Pointer decisionRule = DecisionRuleType::New();

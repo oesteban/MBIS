@@ -79,6 +79,7 @@ template <class TInputComponent, class TProbabilityPixelType>
 void MultichannelParameterEstimator< TInputComponent, TProbabilityPixelType >
 ::GenerateData()
 {
+	Superclass::GenerateData();
 	// Initialize sample
 	m_Input = this->GetInputVectorImage();
     m_NumberOfComponents = m_Input->GetNumberOfComponentsPerPixel();
