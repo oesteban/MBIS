@@ -1,4 +1,6 @@
-/Documentation/Papers
+Documentation/Papers
 .fuse_hidden*
 *.pyc
 .*.swp
+build/
+.project

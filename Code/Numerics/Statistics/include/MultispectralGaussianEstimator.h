@@ -69,16 +69,15 @@ namespace itk
 
 template <class TInputComponent, class TProbabilityPixelType = float >
 class ITK_EXPORT MultispectralGaussianEstimator:
-	public MultispectralFilter< TInputComponent, itk::Image< unsigned char, itk::GetImageDimension<TInputComponent>::ImageDimension> >
+	public MultispectralFilter< TInputComponent, itk::Image< unsigned char, TInputComponent::ImageDimension> >
 {
 public:
 	/** Standard class typedefs */
-	typedef MultispectralGaussianEstimator                                                  Self;
+	typedef MultispectralGaussianEstimator                                         Self;
 	typedef SmartPointer<Self>                                                     Pointer;
 	typedef SmartPointer<const Self>                                               ConstPointer;
 
-	typedef Image< unsigned char,
-			itk::GetImageDimension<TInputComponent>::ImageDimension>               OutputImageType;
+	typedef Image< unsigned char, TInputComponent::ImageDimension>                 OutputImageType;
 	typedef typename OutputImageType::Pointer                                      OutputImagePointer;
 	typedef typename itk::ImageRegionIterator< OutputImageType >                   OutputImageIterator;
 
@@ -93,8 +92,7 @@ public:
 
     /** Priors probability images typedefs */
     typedef TProbabilityPixelType                                                  ProbabilityPixelType;
-    typedef itk::Image< ProbabilityPixelType,
-    		itk::GetImageDimension<TInputComponent>::ImageDimension >              ProbabilityImageType;
+    typedef itk::Image< ProbabilityPixelType,TInputComponent::ImageDimension >     ProbabilityImageType;
     typedef typename ProbabilityImageType::Pointer                                 ProbabilityImagePointer;
     typedef typename ProbabilityImageType::ConstPointer                            ProbabilityImageConstPointer;
     typedef typename std::vector< ProbabilityImageConstPointer >                   ProbabilityImagesVector;

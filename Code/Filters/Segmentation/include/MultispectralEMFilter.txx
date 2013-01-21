@@ -186,6 +186,8 @@ template <class TInputComponent, class TProbabilityPixelType>
 void MultispectralEMFilter< TInputComponent, TProbabilityPixelType >
 ::GenerateData()
 {
+	Superclass::GenerateData();
+
 	// Initialize components and parameters
 	this->Initialize();
 

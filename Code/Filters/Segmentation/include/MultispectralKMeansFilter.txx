@@ -204,6 +204,7 @@ void MultispectralKMeansFilter< TInputComponent, TMaskImage>
 template <class TInputComponent, class TMaskImage>
 void MultispectralKMeansFilter< TInputComponent, TMaskImage>
 ::GenerateData() {
+	Superclass::GenerateData();
 
 	if( m_OutputParameters.size() == 0 ) this->Compute();
 

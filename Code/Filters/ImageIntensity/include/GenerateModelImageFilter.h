@@ -45,7 +45,7 @@
 
 #include <itkImage.h>
 #include <itkImageToImageFilter.h>
-#include <itkImageToVectorImageFilter.h>
+#include <itkComposeImageFilter.h>
 
 using namespace itk;
 

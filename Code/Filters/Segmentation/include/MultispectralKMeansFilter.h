@@ -69,7 +69,7 @@ namespace itk
 
 template <class TInputComponent, class TMaskImage = TInputComponent >
 class ITK_EXPORT MultispectralKMeansFilter:
-	public MultispectralFilter< TInputComponent, itk::Image< unsigned char, itk::GetImageDimension<TInputComponent>::ImageDimension> >
+	public MultispectralFilter< TInputComponent, itk::Image< unsigned char, TInputComponent::ImageDimension> >
 {
 public:
 	/** Standard class typedefs */
@@ -79,9 +79,7 @@ public:
 
 	typedef typename TInputComponent::PixelType                                    InputComponentPixelType;
 
-	typedef Image< unsigned char,
-				itk::GetImageDimension<TInputComponent>::ImageDimension>           OutputImageType;
-
+	typedef Image< unsigned char, TInputComponent::ImageDimension>                 OutputImageType;
 	typedef typename OutputImageType::Pointer                                      OutputImagePointer;
 	typedef typename itk::ImageRegionIterator< OutputImageType >                   OutputImageIterator;
 

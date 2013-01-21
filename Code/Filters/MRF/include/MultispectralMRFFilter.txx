@@ -98,6 +98,7 @@ template <class TInputComponent, class TProbabilityPixelType, class TEnergyValTy
 void MultispectralMRFFilter< TInputComponent, TProbabilityPixelType, TEnergyValType >
 ::GenerateData()
 {
+	Superclass::GenerateData();
 	// Initial general settings -----------------------------------------------------------------------------
 	m_Input = this->GetInputVectorImage();
     m_NumberOfComponents = m_Input->GetNumberOfComponentsPerPixel();

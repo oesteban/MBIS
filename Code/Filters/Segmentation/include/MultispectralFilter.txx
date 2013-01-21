@@ -76,7 +76,6 @@ template <class TInputComponent, class TOutputImage >
 void MultispectralFilter< TInputComponent, TOutputImage >
 ::SetNthInput(unsigned int idx, const TInputComponent * image) {
 	m_VectorFilter->SetInput(idx, const_cast< TInputComponent *>( image ) );
-	m_VectorFilter->Update();
 }
 
 
@@ -86,6 +85,12 @@ void MultispectralFilter< TInputComponent, TOutputImage >
 {
   // Process object is not const-correct so the const_cast is required here
   this->SetNthInput(idx,  const_cast< TInputComponent *>( image ) );
+}
+
+template <class TInputComponent, class TOutputImage >
+void MultispectralFilter< TInputComponent, TOutputImage >
+::GenerateData()  {
+	m_VectorFilter->Update();
 }
 
 template <class TInputComponent, class TOutputImage >

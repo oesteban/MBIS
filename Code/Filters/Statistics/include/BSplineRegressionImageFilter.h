@@ -49,7 +49,7 @@
 #include <itkImageToImageFilter.h>
 #include <itkBSplineScatteredDataPointSetToImageFilter.h>
 #include <itkVectorIndexSelectionCastImageFilter.h>
-#include <itkImageToVectorImageFilter.h>
+#include <itkComposeImageFilter.h>
 
 
 using namespace itk;
@@ -83,7 +83,7 @@ public:
 
 	typedef VectorIndexSelectionCastImageFilter<InputVectorImageType, ChannelImageType>
 	                                                                             InputSelectorType;
-	typedef ImageToVectorImageFilter< ChannelImageType >                        ChannelCombinatorType;
+	typedef ComposeImageFilter< ChannelImageType >                             ChannelCombinatorType;
 
     /** B-spline smoothing filter argument typedefs */
 	typedef Vector<MeasurementType, 1>                                          ScalarType;

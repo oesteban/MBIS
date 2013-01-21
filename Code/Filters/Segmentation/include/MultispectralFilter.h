@@ -47,7 +47,7 @@
 
 #include <itkImage.h>
 #include <itkImageToImageFilter.h>
-#include <itkImageToVectorImageFilter.h>
+#include <itkComposeImageFilter.h>
 
 namespace itk {
 
@@ -92,8 +92,7 @@ public:
 	typedef typename TInputComponent::ConstPointer                 ComponentImageConstPointer;
 	typedef typename std::vector< ComponentImageConstPointer >	   ComponentsVectorType;
 
-
-	typedef ImageToVectorImageFilter< TInputComponent >            InputToVectorFilterType;
+	typedef ComposeImageFilter< ComponentImageType >               InputToVectorFilterType;
 	typedef typename InputToVectorFilterType::Pointer              InputToVectorFilterPointer;
 	typedef typename InputToVectorFilterType::OutputImageType      InputVectorImageType;
 	typedef typename InputVectorImageType::PixelType               InputVectorPixelType;
@@ -114,7 +113,7 @@ public:
 
 protected:
 	MultispectralFilter();
-	~MultispectralFilter();
+	virtual ~MultispectralFilter();
 
 	//virtual void PrintSelf(std::ostream& os, Indent indent) const;
 
@@ -125,6 +124,7 @@ protected:
 		Superclass::SetNthInput(num, input);
 	}
 
+	void GenerateData();
 private:
 	MultispectralFilter( const Self& ); //purposely not implemented
 	void operator=(const Self& );       //purposely not implemented

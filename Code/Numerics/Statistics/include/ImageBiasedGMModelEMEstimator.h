@@ -48,7 +48,7 @@
 #include <itkMixtureModelComponentBase.h>
 #include <itkLogVariableLengthVectorImageFilter.h>
 #include <itkExpVariableLengthVectorImageFilter.h>
-#include <itkMultiplyByConstantImageFilter.h>
+#include <itkMultiplyImageFilter.h>
 #include <itkAddImageFilter.h>
 #include "MaskedImageToListSampleAdaptor.h"
 #include "GaussianMembershipFunction.h"
@@ -75,20 +75,19 @@ public:
 	itkNewMacro (Self);
 
 
-	typedef TInputVectorImage                                                     InputVectorImageType;
+	typedef TInputVectorImage                                                      InputVectorImageType;
 	typedef typename InputVectorImageType::Pointer                                 InputVectorPointer;
 	typedef typename InputVectorImageType::ConstPointer                            InputVectorConstPointer;
 
-    typedef TProbabilityPixelType                                                ProbabilityPixelType;
-    typedef itk::Image< ProbabilityPixelType,
-    		itk::GetImageDimension<TInputVectorImage>::ImageDimension >            ProbabilityImageType;
+    typedef TProbabilityPixelType                                                  ProbabilityPixelType;
+    typedef itk::Image< ProbabilityPixelType,TInputVectorImage::ImageDimension >   ProbabilityImageType;
     typedef typename ProbabilityImageType::Pointer                                 ProbabilityImagePointer;
     typedef typename ProbabilityImageType::ConstPointer                            ProbabilityImageConstPointer;
 
     typedef typename std::vector< ProbabilityImagePointer >                        ProbabilityImageVector;
 
 	typedef itk::Statistics::MaskedImageToListSampleAdaptor
-	                    < InputVectorImageType, ProbabilityImageType >               InputSampleType;
+	                    < InputVectorImageType, ProbabilityImageType >             InputSampleType;
 	typedef typename InputSampleType::MeasurementType                              MeasurementType;
 	typedef typename InputSampleType::MeasurementVectorType                        MeasurementVectorType;
 

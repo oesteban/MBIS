@@ -59,8 +59,8 @@
 #include <itkCastImageFilter.h>
 #include <itkThresholdImageFilter.h>
 
-#include <itkSubtractConstantFromImageFilter.h>
-#include <itkMultiplyByConstantImageFilter.h>
+#include <itkSubtractImageFilter.h>
+#include <itkMultiplyImageFilter.h>
 #include <itkMaskImageFilter.h>
 
 #include <boost/unordered_map.hpp>
@@ -105,8 +105,8 @@ typedef itk::ImageFileReader< ChannelImageType >                                
 typedef itk::CastImageFilter< ChannelImageType, InputComponentType >                         ChannelToComponentCaster;
 typedef itk::IntensityWindowingImageFilter <ChannelImageType, InputComponentType>            IntensityWindowingChannelFilterType;
 typedef itk::StatisticsImageFilter <ChannelImageType>                                        StatisticsChannelFilterType;
-typedef itk::SubtractConstantFromImageFilter< ChannelImageType, ChannelPixelType, ChannelImageType > AddConstantFilter;
-typedef itk::MultiplyByConstantImageFilter< ChannelImageType, ChannelPixelType, ChannelImageType >   MultiplyFilter;
+typedef itk::SubtractImageFilter< ChannelImageType, ChannelImageType, ChannelImageType >     AddConstantFilter;
+typedef itk::MultiplyImageFilter< ChannelImageType, ChannelImageType, ChannelImageType >     MultiplyFilter;
 
 // Probability Image (priors) image definitions
 typedef float                                                                           ProbabilityPixelType;

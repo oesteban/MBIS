@@ -66,7 +66,7 @@ namespace itk
 
 template <class TInputComponent, class TProbabilityPixelType = float, class TEnergyValType = float >
 class ITK_EXPORT MultispectralMRFFilter:
-	public MultispectralFilter< TInputComponent, itk::Image< unsigned char, itk::GetImageDimension<TInputComponent>::ImageDimension> >
+	public MultispectralFilter< TInputComponent, itk::Image< unsigned char, TInputComponent::ImageDimension> >
 {
 public:
 	/** Standard class typedefs */
@@ -229,7 +229,6 @@ protected:
 	 * calculations to an InputSampleFilter. Multithreading depends on
 	 * that one  */
 	void GenerateData();
-
 
 private:
 	MultispectralMRFFilter( const Self& ); //purposely not implemented
