@@ -45,22 +45,17 @@
 
 
 #include <vector>
-
 #include <itkImage.h>
 #include <itkListSample.h>
 #include <Numerics/Statistics/include/MaskedImageToListSampleAdaptor.h>
 #include <itkDistanceToCentroidMembershipFunction.h>
 #include <itkImageKmeansModelEstimator.h>
-
 #include <itkNumericTraits.h>
-
 #include "WeightedCentroidKdTreeImageGenerator.h"
 #include <itkKdTree.h>
 #include <itkKdTreeBasedKmeansEstimator.h>
-
 #include <itkMinimumDecisionRule.h>
 #include <itkSampleClassifierFilter.h>
-
 #include <itkImageClassifierFilter.h>
 
 
