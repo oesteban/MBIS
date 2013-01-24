@@ -400,6 +400,10 @@ int main(int argc, char **argv) {
 		}
 
 		useFile = true;
+
+		std::cout << "\t* Manual Parameters: " << std::endl;
+		for (size_t i = 0; i<initialParameters.size(); i++)
+			std::cout << "\t\t" << initialParameters[i] << std::endl;
 	}
 
 	if ( bfs::exists(initMeansFile)) {
@@ -424,6 +428,10 @@ int main(int argc, char **argv) {
 		}
 
 		useFile = true;
+
+		std::cout << "\t* Manual Parameters: " << std::endl;
+		for (size_t i = 0; i<initialParameters.size(); i++)
+			std::cout << "\t\t" << initialParameters[i] << std::endl;
 	}
 
 	EMFilter::Pointer em_filter;
@@ -464,13 +472,26 @@ int main(int argc, char **argv) {
 				outputCSVfile << initialParameters[i] << "\n";
 			outputCSVfile.close();
 		}
+		kmeans->Update();
 	}
 
 	// Check for sanity initial parameters
 	if( initialParameters.size()!=nClasses ) {
 		std::cerr << "Error: initial parameters size (" << initialParameters.size() << ") doesn't match number of classes (" << (int) nClasses << std::endl;
 	} else if ( initialParameters[0].size() != nElements ) {
-		kmeans->Update();
+		typename MLClassifierFilter::Pointer ml_classifier = MLClassifierFilter::New();
+		ml_classifier->SetInputVector( input );
+		if ( bm.IsNotNull() ) ml_classifier->SetMaskImage(bm);
+		ml_classifier->SetParameters( initialParameters );
+		ml_classifier->Update();
+		solution = ml_classifier->GetOutput();
+
+		if ( doOutputSteps ) {
+			ClassifiedImageWriter::Pointer w = ClassifiedImageWriter::New();
+			w->SetInput( solution );
+			w->SetFileName(outPrefix + "_MLClassified." + outExt );
+			w->Update();
+		}
 
 		ProbabilityImagePointer unoImage = ProbabilityImageType::New();
 		unoImage->SetRegions( input[0]->GetLargestPossibleRegion() );
@@ -491,7 +512,7 @@ int main(int argc, char **argv) {
 
 	    for ( typename ClassifiedImageType::PixelType i = 0 ; i < nClasses ; i++ ) {
 			typename ClassifiedToLabelMapFilter::Pointer lfilter = ClassifiedToLabelMapFilter::New();
-			lfilter->SetInput( kmeans->GetOutput() );
+			lfilter->SetInput( solution );
 			lfilter->Update();
 
 			typename LabelMapMaskFilter::Pointer lmask = LabelMapMaskFilter::New();

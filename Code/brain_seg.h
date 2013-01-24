@@ -75,6 +75,7 @@
 #include "MultichannelParameterEstimator.h"
 #include "MultispectralEMFilter.h"
 #include "MultispectralKMeansFilter.h"
+#include "MultispectralMLClassifierFilter.h"
 #include "MultispectralMRFFilter.h"
 
 using namespace std;
@@ -136,6 +137,7 @@ typedef itk::MultichannelParameterEstimator< InputComponentType >               
 typedef itk::MultispectralEMFilter< InputComponentType >                                EMFilter;
 typedef itk::MultispectralMRFFilter< InputComponentType >                               MRFFilter;
 typedef itk::MultispectralKMeansFilter< InputComponentType, ProbabilityImageType >      KMeansFilter;
+typedef itk::MultispectralMLClassifierFilter< InputComponentType,ProbabilityImageType > MLClassifierFilter;
 typedef itk::IntensityWindowingImageFilter <ProbabilityImageType, ProbabilityImageType> IntensityWindowingImageFilterType;
 typedef itk::ThresholdImageFilter <ProbabilityImageType>                                ThresholdImageFilterType;
 typedef itk::StatisticsImageFilter <ProbabilityImageType>                               StatisticsImageFilterType;
