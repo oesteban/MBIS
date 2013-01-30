@@ -72,7 +72,7 @@ public:
 
 	itkStaticConstMacro( ImageDimension, unsigned int,  TInputVectorImage::ImageDimension );
 
-	typedef TInputVectorImage                                                InputVectorImageType;
+	typedef TInputVectorImage                                                 InputVectorImageType;
 	typedef typename InputVectorImageType::Pointer                            InputVectorImagePointer;
 	typedef typename InputVectorImageType::ConstPointer                       InputVectorImageConstPointer;
 	typedef typename InputVectorImageType::PixelType                          MeasurementVectorType;

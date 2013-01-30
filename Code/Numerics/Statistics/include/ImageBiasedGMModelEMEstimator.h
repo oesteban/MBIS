@@ -54,7 +54,7 @@
 #include "GaussianMembershipFunction.h"
 #include "BSplineRegressionImageFilter.h"
 #include "GenerateModelImageFilter.h"
-
+#include "NormalizeToModelImageFilter.h"
 
 using namespace itk;
 
@@ -108,7 +108,9 @@ public:
     typedef typename itk::SubtractImageFilter
     		<InputVectorImageType, InputVectorImageType, InputVectorImageType>     SubtractFilter;
 
-    typedef typename mfbs::BSplineRegressionImageFilter<InputVectorImageType>    FieldEstimatorFilter;
+    typedef typename mfbs::BSplineRegressionImageFilter<InputVectorImageType>      FieldEstimatorFilter;
+
+    typedef typename mfbs::NormalizeToModelImageFilter<InputVectorImageType>       FieldNormalizerFilter;
 
     typedef typename mfbs::GenerateModelImageFilter< InputVectorImageType, ProbabilityImageType >
                                                                                    GenerateModelFilter;

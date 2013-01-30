@@ -360,6 +360,12 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	subFilter->SetInput2( logModel->GetOutput() );
 	subFilter->Update();
 
+	typedef typename itk::ImageFileWriter< InputVectorImageType > W;
+	typename W::Pointer w = W::New();
+	w->SetInput( subFilter->GetOutput() );
+	w->SetFileName( "testBias.nii.gz" );
+	w->Update();
+
 	// Estimate log bias function
 	typename FieldEstimatorFilter::Pointer biasEstimator = FieldEstimatorFilter::New();
 	typename FieldEstimatorFilter::ArrayType n;
@@ -373,10 +379,23 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	}
 	biasEstimator->Update();
 
+	typename FieldNormalizerFilter::Pointer biasNormalizer = FieldNormalizerFilter::New();
+	biasNormalizer->SetReferenceImage( subFilter->GetOutput() );
+	biasNormalizer->SetNormalizeImage( biasEstimator->GetOutput() );
+	biasNormalizer->SetLambda( 0.8 );
+	if ( m_MaskImage.IsNotNull() )
+		biasNormalizer->SetMaskImage( m_MaskImage );
+	biasNormalizer->Update();
+
+	typename W::Pointer w2 = W::New();
+	w2->SetInput( biasNormalizer->GetOutput() );
+	w2->SetFileName( "testBiasEstimated.nii.gz" );
+	w2->Update();
+
 	// Correct Input Image
 	typename SubtractFilter::Pointer correct = SubtractFilter::New();
 	correct->SetInput1( logInput->GetOutput() );
-	correct->SetInput2( biasEstimator->GetOutput() );
+	correct->SetInput2( biasNormalizer->GetOutput() );
 	correct->Update();
 
 	// Set up corrected image
@@ -384,6 +403,11 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	exp->SetInput( correct->GetOutput() );
 	exp->Update();
 	m_CorrectedInput = exp->GetOutput();
+
+	typename W::Pointer w3 = W::New();
+	w3->SetInput( m_CorrectedInput );
+	w3->SetFileName( "testBiasCorrected.nii.gz" );
+	w3->Update();
 
 	// Set new reference to sample
 	m_Sample->SetImage( m_CorrectedInput );
