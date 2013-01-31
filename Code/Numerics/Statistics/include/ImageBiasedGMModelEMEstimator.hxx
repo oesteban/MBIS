@@ -182,6 +182,10 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Cal
 		for (size_t x = 0; x < numberOfComponents; ++x)
 			densitySum += tempWeights[x];
 
+
+		//m_CurrentEnergy += m_ComponentVector[k]->EvaluateEnergy(yVector);
+		m_CurrentEnergy += vcl_log(densitySum);
+
 		double maxWeight = 0.0;
 		size_t k = 0;
 		for (size_t x = 0; x < numberOfComponents; ++x) {
@@ -203,10 +207,9 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Cal
 			// m_Ptly[measurementVectorIndex][x] = temp;
 			*(m_Posteriors[x]->GetBufferPointer() + iter.GetInstanceIdentifier()) = temp;
 		}
-
-		//m_CurrentEnergy += m_ComponentVector[k]->EvaluateEnergy(yVector);
-		m_CurrentEnergy += vcl_log(maxWeight);
 	}
+
+	m_CurrentEnergy = m_CurrentEnergy / (double) (measurementVectorIndex+1);
 
 
 	return true;
@@ -445,7 +448,7 @@ void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Gen
 		}
 
 		// TODO Throw iteration event
-		std::cout << "Iteration " << iteration << " - log-L=" << std::setprecision(15) << m_CurrentEnergy << std::endl;
+		std::cout << "Iteration " << iteration << " - E[log-L]=" << m_CurrentEnergy << std::endl;
 		for (unsigned int i = 0; i < m_ComponentVector.size(); i++) {
 			std::cout << "\tClass[" << i << "," << m_Proportions[i] << "]: " << m_ComponentVector[i]->GetFullParameters() << std::endl;
 
