@@ -121,7 +121,7 @@ void MultispectralMLClassifierFilter< TInputComponent, TMaskImage>
 
     // Iterator to copy to output
     OutputImageIterator im_it( outputPtr, outputPtr->GetLargestPossibleRegion());
-    im_it.Begin();
+    im_it.GoToBegin();
 
     // Generate (copy data to output). Do not copy pixels outside masks or outside thresholds window (min1,max1)
     while ( !im_it.IsAtEnd() ) {

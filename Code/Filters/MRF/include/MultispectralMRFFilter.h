@@ -50,7 +50,7 @@
 #include <itkTimeProbesCollectorBase.h>
 
 #include "MultispectralFilter.h"
-#include "MultispectralGaussianEstimator.h"
+//#include "MultispectralGaussianEstimator.h"
 #include "MultichannelParameterEstimator.h"
 
 #include "MRFEnergy.h"
@@ -110,7 +110,7 @@ public:
     typedef typename std::vector< ProbabilityImageConstPointer >                   ProbabilityConstImagesVector;
     typedef typename std::vector< ProbabilityImagePointer >                        ProbabilityImagesVector;
     typedef typename itk::ConstNeighborhoodIterator<ProbabilityImageType>          ConstProbNeighIterator;
-    typedef itk::MultispectralGaussianEstimator< ProbabilityImageType >            GaussianEstimatorFilter;
+    //typedef itk::MultispectralGaussianEstimator< ProbabilityImageType >            GaussianEstimatorFilter;
 
     typedef itk::VariableSizeMatrix< EnergyValType >                               EnergyMatrixType;
     typedef itk::Image< EnergyValType, ImageDimension >                            EnergyMapType;
@@ -263,7 +263,7 @@ private:
 	typename NeighborhoodIterator<OutputImageType>::RadiusType m_Radius;
 
 
-	typename GaussianEstimatorFilter::Pointer                  m_GaussianEstimator;
+	//typename GaussianEstimatorFilter::Pointer                  m_GaussianEstimator;
 	OutputImagePointer                                         m_InitialLabeling;
 	size_t                                                     m_MinimizationMode;
 

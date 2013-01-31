@@ -263,7 +263,7 @@ void MultispectralEMFilter< TInputComponent, TProbabilityPixelType >
 
     // Iterator to copy to output
     OutputImageIterator im_it( outputPtr, outputPtr->GetLargestPossibleRegion());
-    im_it.Begin();
+    im_it.GoToBegin();
 
     // Generate (copy data to output)
     while ( !im_it.IsAtEnd() ) {

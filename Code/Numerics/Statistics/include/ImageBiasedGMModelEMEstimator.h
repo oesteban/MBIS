@@ -225,6 +225,8 @@ protected:
 
 	double CalculateExpectation() const;
 
+	double GetEnergyValue() const;
+
 	bool UpdateComponentParameters();
 
 	bool UpdateProportions();
@@ -258,7 +260,8 @@ private:
 	ProbabilityImageConstPointer m_MaskImage;
 	InputVectorPointer           m_BiasLog;
 	InputVectorPointer           m_CurrentBias;
-	bool                        m_UseBiasCorrection;
+	bool                         m_UseBiasCorrection;
+	double                       m_CurrentEnergy;
 
 }; // end of class
 

@@ -144,7 +144,7 @@ void GaussianMembershipFunction<TMeasurementVector>::SetCovariance(const Covaria
 	double det = inv_cov.determinant_magnitude();
 
 	if( det < 0.) {
-		itkExceptionMacro( << "det( m_Covariance ) < 0" );
+		itkExceptionMacro( << "det (\\gamma) < 0" );
 	}
 
 	// FIXME Singurality Threshold for Covariance matrix: 1e-6 is an arbitrary value!!!
@@ -157,17 +157,19 @@ void GaussianMembershipFunction<TMeasurementVector>::SetCovariance(const Covaria
 
 	} else {
 		// Perform cholesky diagonalization and select the semi-positive aproximation
+		itkWarningMacro( "Warning: covariance is singular, setting diagonal covariance" );
 		vnl_ldl_cholesky* chol = new vnl_ldl_cholesky( m_Covariance.GetVnlMatrix() );
 		vnl_vector< double > D( chol->diagonal() );
 		det = dot_product( D, D );
 		vnl_matrix_inverse< double > R (chol->upper_triangle());
 		m_InverseCovariance.GetVnlMatrix() = R.inverse();
+		m_CovarianceNonsingular = true;
 	}
 
 	// calculate coefficient C of multivariate gaussian
-	double piFactor = vcl_pow( 2.0 * vnl_math::pi, static_cast< double >( this->GetMeasurementVectorSize() ) );
-	m_PreFactor = 1.0 / vcl_sqrt( piFactor * det);
-	m_LogPreFactor = vcl_log( det );
+	double d = static_cast< double >( this->GetMeasurementVectorSize() );
+	m_PreFactor = 1.0 / vcl_pow( vcl_pow( 2.0 * vnl_math::pi, d ) * det, 0.5);
+	m_LogPreFactor = vcl_log( det ) + d * vcl_log( 2.0*vnl_math::pi );
 
 	this->Modified();
 }
@@ -210,14 +212,9 @@ inline double GaussianMembershipFunction<TMeasurementVector>
 		tempVector[i] = measurement[i] - m_Mean[i];
 	}
 
-	if (m_CovarianceNonsingular) {
-		// temp = ( y - mean )^t * InverseCovariance * ( y - mean )
-		argument = dot_product(tempVector, m_InverseCovariance.GetVnlMatrix() * tempVector);
-	} else {
-		// FIXME Covariance singular: What's this??
-		tempVector = tempVector * m_InverseCovariance.GetVnlMatrix();
-		argument = 2.0 * dot_product(tempVector, tempVector);
-	}
+	// temp = ( y - mean )^t * InverseCovariance * ( y - mean )
+	argument = dot_product(tempVector, m_InverseCovariance.GetVnlMatrix() * tempVector);
+
 	return argument;
 }
 
