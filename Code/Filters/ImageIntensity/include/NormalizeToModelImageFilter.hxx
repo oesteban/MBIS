@@ -102,23 +102,10 @@ void NormalizeToModelImageFilter< TInputVectorImage >
 		const MeasurementType* buf0 = sel0->GetOutput()->GetBufferPointer();
 		const MeasurementType* buf1 = sel1->GetOutput()->GetBufferPointer();
 
-		//MeasurementType maximum[2],minimum[2];
-		//maximum[0] = itk::NumericTraits< MeasurementType >::min();
-        //maximum[1] = itk::NumericTraits< MeasurementType >::min();
-		//minimum[0] = itk::NumericTraits< MeasurementType >::max();
-		//minimum[1] = itk::NumericTraits< MeasurementType >::max();
-
 		for( size_t p = 0; p<numPixels; p++ ) {
 			if( !isMasked || *( maskBuffer+p) > 0 ){
 				sample0.push_back( *( buf0 + p ) );
 				sample1.push_back( *( buf1 + p ) );
-				//MeasurementType v0 = *( buf0 + p );
-				//MeasurementType v1 = *( buf1 + p );
-                //
-				//if ( v0 > maximum[0] ) maximum[0] = v0;
-				//if ( v1 > maximum[1] ) maximum[1] = v1;
-				//if ( v0 < minimum[0] ) minimum[0] = v0;
-				//if ( v1 < minimum[1] ) minimum[1] = v1;
 			}
 		}
 

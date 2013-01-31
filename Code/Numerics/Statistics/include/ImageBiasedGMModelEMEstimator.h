@@ -260,7 +260,8 @@ private:
 	ProbabilityImageConstPointer m_MaskImage;
 	InputVectorPointer           m_BiasLog;
 	InputVectorPointer           m_CurrentBias;
-	bool                        m_UseBiasCorrection;
+	bool                         m_UseBiasCorrection;
+	bool                         m_BiasCorrectionStopped;
 
 }; // end of class
 

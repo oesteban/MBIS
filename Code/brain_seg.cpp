@@ -217,8 +217,44 @@ int main(int argc, char **argv) {
 	} else {
 		if ( useImplicitMasks ) {
 			std::cout << "\t* Mask: channels are masked." << std::endl;
+			// TODO generate mask in bm
 		} else {
 			std::cout << "\t* Mask: not requested." << std::endl;
+		}
+	}
+
+	if ( useImplicitMasks ) {
+		ChannelReader::Pointer r = ChannelReader::New();
+		r->SetFileName( channels[0] );
+		ChannelPointer p = r->GetOutput();
+		r->Update();
+
+
+		bm = ProbabilityImageType::New();
+		bm->SetRegions( r->GetOutput()->GetLargestPossibleRegion() );
+		bm->CopyInformation( r->GetOutput() );
+		bm->Allocate();
+		bm->FillBuffer( 1.0 );
+		bm->Update();
+
+		ProbabilityPixelType* buffer = bm->GetBufferPointer();
+		size_t numberOfPixels = bm->GetLargestPossibleRegion().GetNumberOfPixels();
+
+		const PixelType* buffer2 = r->GetOutput()->GetBufferPointer();
+		for( size_t offset = 0; offset < numberOfPixels; offset++ ) {
+			if( *( buffer + offset ) > 0.0 ) {
+				*( buffer + offset ) = PixelType ( *( buffer2 + offset ) > 1e-5);
+			}
+		}
+
+
+		if( doOutputSteps ) {
+			itk::ImageFileWriter< ProbabilityImageType >::Pointer wc = itk::ImageFileWriter< ProbabilityImageType >::New();
+			wc->SetInput( bm );
+			std::stringstream ss;
+			ss << outPrefix << "_mask." << outExt;
+			wc->SetFileName( ss.str() );
+			wc->Update();
 		}
 	}
 
@@ -292,38 +328,6 @@ int main(int argc, char **argv) {
 		input.push_back( im );
 
 		std::cout << "\t* Channel [" << std::setw(2) << input.size() << "] read: " << (*it) << std::endl;
-	}
-
-	if ( useImplicitMasks ) {
-		bm = ProbabilityImageType::New();
-		bm->SetRegions( input[0]->GetLargestPossibleRegion() );
-		bm->CopyInformation( input[0] );
-		bm->Allocate();
-		bm->FillBuffer( 1.0 );
-		bm->Update();
-
-		ProbabilityPixelType* buffer = bm->GetBufferPointer();
-		size_t numberOfPixels = bm->GetLargestPossibleRegion().GetNumberOfPixels();
-
-		for ( size_t i = 0; i < input.size(); i++) {
-			const PixelType* buffer2 = input[i]->GetBufferPointer();
-
-			for( size_t offset = 0; offset < numberOfPixels; offset++ ) {
-				if( *( buffer + offset ) > 0.0 ) {
-					*( buffer + offset ) = PixelType ( *( buffer2 + offset ) > 1e-5);
-				}
-			}
-		}
-
-
-		if( doOutputSteps ) {
-			itk::ImageFileWriter< ProbabilityImageType >::Pointer wc = itk::ImageFileWriter< ProbabilityImageType >::New();
-			wc->SetInput( bm );
-			std::stringstream ss;
-			ss << outPrefix << "_mask." << outExt;
-			wc->SetFileName( ss.str() );
-			wc->Update();
-		}
 	}
 
 
