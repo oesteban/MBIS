@@ -92,7 +92,7 @@ const float DEFAULT_ATLAS_TH = 0.50;
 const unsigned int DEFAULT_MAX_ITER         = 10;
 const float DEFAULT_LAMBDA                  = 0.6;
 const unsigned int DEFAULT_MRF_ITERATIONS   = 1;
-const unsigned short NORM_MAX_INTENSITY     = 5000;
+const unsigned short NORM_MAX_INTENSITY     = 1000.0;
 const std::string DEFAULT_MRF_ALG           = "expansion";
 
 typedef float                                                                           PixelType;

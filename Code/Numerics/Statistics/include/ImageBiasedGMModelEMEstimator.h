@@ -226,17 +226,14 @@ protected:
 	virtual ~ImageBiasedGMModelEMEstimator() {
 	}
 	void PrintSelf(std::ostream & os, Indent indent) const;
+	void PrintIteration(std::ostream & os) const;
 
 	bool ExpectationStep();
-
-	bool UpdateComponentParameters();
-
+	bool MaximizationStep();
 	bool UpdateProportions();
+	bool BiasEstimationStep();
 
-	bool UpdateBiasFieldEstimate();
-
-	/** Starts the estimation process */
-	void GenerateData();
+	void Initialize();
 
 private:
 	typedef mfbs::VectorImageFileWriter< InputVectorImageType >  VectorWriter;
@@ -244,8 +241,8 @@ private:
 	/** Target data sample pointer*/
 	typename InputSampleType::Pointer         m_Sample;
 
-	int m_MaxIteration;
-	int m_CurrentIteration;
+	size_t m_MaxIteration;
+	size_t m_CurrentIteration;
 	size_t m_MaxBiasEstimationIterations;
 
 	TERMINATION_CODE m_TerminationCode;

@@ -50,84 +50,36 @@
 
 namespace mfbs {
 namespace Statistics {
-template <class TInputVectorImage, class TProbabilityPixelType>
-ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ImageBiasedGMModelEMEstimator() {
-	m_TerminationCode = NOT_CONVERGED;
 
-	m_MembershipFunctionsObject = MembershipFunctionVectorObjectType::New();
-	m_MembershipFunctionsWeightArrayObject = MembershipFunctionsWeightsArrayObjectType::New();
-	m_Sample = 0;
-	m_MaxIteration = 100;
-	m_UseBiasCorrection = true;
-//	m_BiasCorrectionStopped = false;
-
-	m_CurrentExpectation = itk::NumericTraits< double >::max();
-	m_MaxBiasEstimationIterations = 5;
-}
 
 template <class TInputVectorImage, class TProbabilityPixelType>
-void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::PrintSelf(std::ostream & os, Indent indent) const {
-	Superclass::PrintSelf(os, indent);
-	os << indent << "Maximum Iteration: " << this->GetMaximumIteration() << std::endl;
-	os << indent << "Sample: " << m_Sample << std::endl;
-	os << indent << "Number Of Components: " << this->GetNumberOfComponents() << std::endl;
-	for (unsigned int i = 0; i < this->GetNumberOfComponents(); i++) {
-		os << indent << "Component Membership Function[" << i << "]: " << this->GetComponentMembershipFunction(i) << std::endl;
+void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Update() {
+	this->Initialize();
+	m_CurrentIteration = 0;
+
+	while (m_CurrentIteration < m_MaxIteration) {
+		// E-step
+		this->ExpectationStep();
+
+		// B-step
+		if( m_UseBiasCorrection && m_MaxBiasEstimationIterations > m_CurrentIteration )
+			this->BiasEstimationStep();  // Bias field estimation
+
+		// M-step
+		if (this->MaximizationStep()) {
+			this->UpdateProportions();
+		} else {
+			m_TerminationCode = CONVERGED;
+			break;
+		}
+
+		// TODO Throw iteration event
+		this->PrintIteration(std::cout);
+
+		++m_CurrentIteration;
 	}
-	os << indent << "Termination Code: " << this->GetTerminationCode() << std::endl;
-	os << indent << "Initial Proportions: " << this->GetInitialProportions() << std::endl;
-	os << indent << "Proportions: " << this->GetProportions() << std::endl;
-	os << indent << "Calculated Expectation: " << this->m_CurrentExpectation << std::endl;
-}
 
-template <class TInputVectorImage, class TProbabilityPixelType>
-void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::SetMaximumIteration(int numberOfIterations) {
-	m_MaxIteration = numberOfIterations;
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-int ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetMaximumIteration() const {
-	return m_MaxIteration;
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::SetInitialProportions(ProportionVectorType & proportions) {
-	m_InitialProportions = proportions;
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-const typename ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ProportionVectorType &
-ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetInitialProportions() const {
-	return m_InitialProportions;
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-const typename ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ProportionVectorType &
-ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetProportions() const {
-	return m_Proportions;
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-int ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::AddComponent(ComponentType *component) {
-	m_ComponentVector.push_back(component);
-	return static_cast<int>(m_ComponentVector.size());
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-unsigned int ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetNumberOfComponents() const {
-	return m_ComponentVector.size();
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-typename ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::TERMINATION_CODE
-ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetTerminationCode() const {
-	return m_TerminationCode;
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-typename ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ComponentMembershipFunctionType *
-ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetComponentMembershipFunction(int componentIndex) const {
-	return (m_ComponentVector[componentIndex])->GetMembershipFunction();
+	m_TerminationCode = NOT_CONVERGED;
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
@@ -206,6 +158,17 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Exp
 		}
 	}
 
+#ifndef NDEBUG
+	for( size_t i = 0; i<m_Posteriors.size(); i++) {
+		typename itk::ImageFileWriter< ProbabilityImageType >::Pointer w = itk::ImageFileWriter< ProbabilityImageType >::New();
+		w->SetInput( m_Posteriors[i] );
+		std::stringstream ss;
+		ss << "debug_post_it" << this->m_CurrentIteration << "_id" << i << ".nii.gz";
+		w->SetFileName( ss.str().c_str() );
+		w->Update();
+	}
+#endif
+
 	m_CurrentExpectation = m_CurrentExpectation / (double) (measurementVectorIndex+1);
 
 
@@ -213,7 +176,7 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Exp
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
-bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::UpdateComponentParameters() {
+bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::MaximizationStep() {
 	bool updated = false;
 	size_t numberOfComponents = m_ComponentVector.size();
 	ComponentType *component;
@@ -296,11 +259,9 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
-bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::UpdateBiasFieldEstimate() {
+bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::BiasEstimationStep() {
 	size_t numberOfComponents = m_ComponentVector.size();
-	//size_t biasOffset = ( m_MaskImage.IsNull() )?1:0;
 	size_t numberOfChannels = m_Input->GetNumberOfComponentsPerPixel();
-	//size_t numberOfBiasedLabels = numberOfComponents - biasOffset;
 
 	// Get means
 	std::vector< MeasurementVectorType > means;
@@ -329,30 +290,15 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	logModel->SetInput( modelFilter->GetOutput() );
 	logModel->Update();
 
-	typename VectorWriter::Pointer w0 = VectorWriter::New();
-	w0->SetInput( logModel->GetOutput() );
-	w0->SetFileName( "biasLogModel.nii.gz" );
-	w0->Update();
-
 	typename LogFilter::Pointer logInput = LogFilter::New();
 	logInput->SetInput( m_CorrectedInput );
 	logInput->Update();
-
-	typename VectorWriter::Pointer w1 = VectorWriter::New();
-	w1->SetInput( logInput->GetOutput() );
-	w1->SetFileName( "biasLogInput.nii.gz" );
-	w1->Update();
 
 	// Subtract current bias field
 	typename SubtractFilter::Pointer subFilter = SubtractFilter::New();
 	subFilter->SetInput1( logInput->GetOutput() );
 	subFilter->SetInput2( logModel->GetOutput() );
 	subFilter->Update();
-
-	typename VectorWriter::Pointer w2 = VectorWriter::New();
-	w2->SetInput( subFilter->GetOutput() );
-	w2->SetFileName( "biasError.nii.gz" );
-	w2->Update();
 
 	// Estimate log bias function
 	typename FieldEstimatorFilter::Pointer biasEstimator = FieldEstimatorFilter::New();
@@ -367,11 +313,6 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	}
 	biasEstimator->Update();
 
-	typename VectorWriter::Pointer w3 = VectorWriter::New();
-	w3->SetInput( biasEstimator->GetOutput() );
-	w3->SetFileName( "biasErrorEstimated.nii.gz" );
-	w3->Update();
-
 	typename FieldNormalizerFilter::Pointer biasNormalizer = FieldNormalizerFilter::New();
 	biasNormalizer->SetReferenceImage( subFilter->GetOutput() );
 	biasNormalizer->SetNormalizeImage( biasEstimator->GetOutput() );
@@ -379,11 +320,6 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	if ( m_MaskImage.IsNotNull() )
 		biasNormalizer->SetMaskImage( m_MaskImage );
 	biasNormalizer->Update();
-
-	typename VectorWriter::Pointer w4 = VectorWriter::New();
-	w4->SetInput( biasNormalizer->GetOutput() );
-	w4->SetFileName( "biasErrorEstimatedNormalized.nii.gz" );
-	w4->Update();
 
 	// Correct Input Image
 	typename SubtractFilter::Pointer correct = SubtractFilter::New();
@@ -396,11 +332,6 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	exp->SetInput( correct->GetOutput() );
 	exp->Update();
 	m_CorrectedInput = exp->GetOutput();
-
-	typename VectorWriter::Pointer w5 = VectorWriter::New();
-	w5->SetInput( m_CorrectedInput );
-	w5->SetFileName( "biasCorrected.nii.gz" );
-	w5->Update();
 
 	// Set new reference to sample
 	m_Sample->SetImage( m_CorrectedInput );
@@ -417,42 +348,106 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	expBias->SetInput( m_BiasLog );
 	expBias->Update();
 	m_CurrentBias = expBias->GetOutput();
+
+#ifndef NDEBUG
+	std::stringstream ss;
+	ss << "debug_bias_it" << m_CurrentIteration << "_";
+	std::string prefix = ss.str();
+	typename VectorWriter::Pointer wA = VectorWriter::New();
+	wA->SetInput( modelFilter->GetOutput() );
+	wA->SetFileName( prefix + std::string( "model.nii.gz" ));
+	wA->Update();
+
+	typename VectorWriter::Pointer w0 = VectorWriter::New();
+	w0->SetInput( logModel->GetOutput() );
+	w0->SetFileName( prefix + std::string("logModel.nii.gz" ));
+	w0->Update();
+
+	typename VectorWriter::Pointer w1 = VectorWriter::New();
+	w1->SetInput( logInput->GetOutput() );
+	w1->SetFileName( prefix + std::string("logInput.nii.gz" ));
+	w1->Update();
+
+	typename VectorWriter::Pointer w2 = VectorWriter::New();
+	w2->SetInput( subFilter->GetOutput() );
+	w2->SetFileName( prefix + std::string("error.nii.gz" ));
+	w2->Update();
+
+	typename VectorWriter::Pointer w3 = VectorWriter::New();
+	w3->SetInput( biasEstimator->GetOutput() );
+	w3->SetFileName( prefix + std::string("errorEstimated.nii.gz" ));
+	w3->Update();
+
+	typename VectorWriter::Pointer w4 = VectorWriter::New();
+	w4->SetInput( biasNormalizer->GetOutput() );
+	w4->SetFileName( prefix + std::string("errorEstimatedNormalized.nii.gz" ));
+	w4->Update();
+
+	typename VectorWriter::Pointer w6 = VectorWriter::New();
+	w6->SetInput( m_BiasLog );
+	w6->SetFileName( prefix + std::string("accumulatedBias.nii.gz" ));
+	w6->Update();
+
+	typename VectorWriter::Pointer w5 = VectorWriter::New();
+	w5->SetInput( m_CorrectedInput );
+	w5->SetFileName( prefix + std::string("corrected.nii.gz" ) );
+	w5->Update();
+#endif
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
-void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GenerateData() {
-	int iteration = 0;
-	m_CurrentIteration = 0;
-	while (iteration < m_MaxIteration) {
-		m_CurrentIteration = iteration;
+void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Initialize() {
+	unsigned int numberOfComponents = m_ComponentVector.size();
 
-		// E-step
-		this->ExpectationStep();
+	// Initialize a copy of input
+	typedef itk::ImageDuplicator< InputVectorImageType > Duplicator;
+	typename Duplicator::Pointer d = Duplicator::New();
+	d->SetInputImage( m_Input );
+	d->Update();
+	m_CorrectedInput = d->GetOutput();
 
-		//if( m_UseBiasCorrection && !m_BiasCorrectionStopped) // Bias field estimation
-		if( m_UseBiasCorrection && m_MaxBiasEstimationIterations > m_CurrentIteration ) // Bias field estimation
-			this->UpdateBiasFieldEstimate();
+	// Initialize Sample
+	m_Sample = InputSampleType::New();
+	m_Sample->SetImage( m_Input );
 
-		// M-step
-		if (this->UpdateComponentParameters()) {
-			this->UpdateProportions();
-		} else {
-			m_TerminationCode = CONVERGED;
-			break;
-		}
-
-		// TODO Throw iteration event
-		std::cout << "Iteration " << iteration << " - E[log-L]=" << m_CurrentExpectation << std::endl;
-		for (unsigned int i = 0; i < m_ComponentVector.size(); i++) {
-			std::cout << "\tClass[" << i << "," << m_Proportions[i] << "]: " << m_ComponentVector[i]->GetFullParameters() << std::endl;
-
-		}
-
-		++iteration;
+	// Prepare mask for filters
+	if( m_MaskImage.IsNotNull() ) {
+		m_Sample->SetMask( m_MaskImage );
 	}
 
-	m_TerminationCode = NOT_CONVERGED;
+	m_Sample->Initialize();
+
+	// Initialize log bias field
+	m_BiasLog = InputVectorImageType::New();
+	m_BiasLog->SetRegions( m_Input->GetRequestedRegion() );
+	m_BiasLog->CopyInformation( m_Input );
+	m_BiasLog->SetNumberOfComponentsPerPixel( m_Input->GetNumberOfComponentsPerPixel() );
+	m_BiasLog->Allocate();
+	MeasurementVectorType m ( m_Input->GetNumberOfComponentsPerPixel() );
+	m.Fill(0.0);
+	m_BiasLog->FillBuffer( m );
+	m_CurrentBias = InputVectorImageType::New();
+	m_CurrentBias->SetRegions( m_Input->GetRequestedRegion() );
+	m_CurrentBias->CopyInformation( m_Input );
+	m_CurrentBias->SetNumberOfComponentsPerPixel( m_Input->GetNumberOfComponentsPerPixel() );
+	m_CurrentBias->Allocate();
+	m_CurrentBias->FillBuffer( m );
+
+
+	// Initialize Model
+	m_Proportions = m_InitialProportions;
+	m_Posteriors.resize( numberOfComponents );
+
+	for( size_t c = 0; c<numberOfComponents; c++) {
+		m_Posteriors[c] = ProbabilityImageType::New();
+		m_Posteriors[c]->SetRegions( m_Input->GetRequestedRegion() );
+		m_Posteriors[c]->CopyInformation( m_Input );
+		m_Posteriors[c]->Allocate();
+		m_Posteriors[c]->FillBuffer(0.0);
+		m_Posteriors[c]->Update();
+	}
 }
+
 
 template <class TInputVectorImage, class TProbabilityPixelType>
 const typename ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::MembershipFunctionVectorObjectType *
@@ -498,6 +493,48 @@ ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetOutpu
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
+void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::PrintIteration(std::ostream & os) const {
+	os << "Iteration " << m_CurrentIteration << " - E[log-L]=" << m_CurrentExpectation << std::endl;
+	for (unsigned int i = 0; i < m_ComponentVector.size(); i++) {
+		os << "\tClass[" << i << "," << m_Proportions[i] << "]: " << m_ComponentVector[i]->GetFullParameters() << std::endl;
+
+	}
+}
+
+
+template <class TInputVectorImage, class TProbabilityPixelType>
+ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ImageBiasedGMModelEMEstimator() {
+	m_TerminationCode = NOT_CONVERGED;
+
+	m_MembershipFunctionsObject = MembershipFunctionVectorObjectType::New();
+	m_MembershipFunctionsWeightArrayObject = MembershipFunctionsWeightsArrayObjectType::New();
+	m_Sample = 0;
+	m_MaxIteration = 100;
+	m_UseBiasCorrection = true;
+//	m_BiasCorrectionStopped = false;
+
+	m_CurrentExpectation = itk::NumericTraits< double >::max();
+	m_MaxBiasEstimationIterations = 5;
+	m_CurrentIteration = 0;
+}
+
+template <class TInputVectorImage, class TProbabilityPixelType>
+void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::PrintSelf(std::ostream & os, Indent indent) const {
+	Superclass::PrintSelf(os, indent);
+	os << indent << "Maximum Iteration: " << this->GetMaximumIteration() << std::endl;
+	os << indent << "Sample: " << m_Sample << std::endl;
+	os << indent << "Number Of Components: " << this->GetNumberOfComponents() << std::endl;
+	for (unsigned int i = 0; i < this->GetNumberOfComponents(); i++) {
+		os << indent << "Component Membership Function[" << i << "]: " << this->GetComponentMembershipFunction(i) << std::endl;
+	}
+	os << indent << "Termination Code: " << this->GetTerminationCode() << std::endl;
+	os << indent << "Initial Proportions: " << this->GetInitialProportions() << std::endl;
+	os << indent << "Proportions: " << this->GetProportions() << std::endl;
+	os << indent << "Calculated Expectation: " << this->m_CurrentExpectation << std::endl;
+}
+
+
+template <class TInputVectorImage, class TProbabilityPixelType>
 const typename ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::MembershipFunctionsWeightsArrayObjectType *
 ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetMembershipFunctionsWeightsArray() const {
 	size_t numberOfComponents = m_ComponentVector.size();
@@ -512,61 +549,55 @@ ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetMembe
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
-void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Update() {
-	unsigned int numberOfComponents = m_ComponentVector.size();
-
-
-	// Initialize a copy of input
-	typedef itk::ImageDuplicator< InputVectorImageType > Duplicator;
-	typename Duplicator::Pointer d = Duplicator::New();
-	d->SetInputImage( m_Input );
-	d->Update();
-	m_CorrectedInput = d->GetOutput();
-
-	// Initialize Sample
-	m_Sample = InputSampleType::New();
-	//m_Sample->SetImage( m_CorrectedInput );
-	m_Sample->SetImage( m_Input );
-
-	// Prepare mask for filters
-	if( m_MaskImage.IsNotNull() ) {
-		m_Sample->SetMask( m_MaskImage );
-	}
-
-	m_Sample->Initialize();
-
-	// Initialize log bias field
-	m_BiasLog = InputVectorImageType::New();
-	m_BiasLog->SetRegions( m_Input->GetRequestedRegion() );
-	m_BiasLog->CopyInformation( m_Input );
-	m_BiasLog->SetNumberOfComponentsPerPixel( m_Input->GetNumberOfComponentsPerPixel() );
-	m_BiasLog->Allocate();
-	MeasurementVectorType m ( m_Input->GetNumberOfComponentsPerPixel() );
-	m.Fill(0.0);
-	m_BiasLog->FillBuffer( m );
-	m_CurrentBias = InputVectorImageType::New();
-	m_CurrentBias->SetRegions( m_Input->GetRequestedRegion() );
-	m_CurrentBias->CopyInformation( m_Input );
-	m_CurrentBias->SetNumberOfComponentsPerPixel( m_Input->GetNumberOfComponentsPerPixel() );
-	m_CurrentBias->Allocate();
-	m_CurrentBias->FillBuffer( m );
-
-
-	// Initialize Model
-	m_Proportions = m_InitialProportions;
-	m_Posteriors.resize( numberOfComponents );
-
-	for( size_t c = 0; c<numberOfComponents; c++) {
-		m_Posteriors[c] = ProbabilityImageType::New();
-		m_Posteriors[c]->SetRegions( m_Input->GetRequestedRegion() );
-		m_Posteriors[c]->CopyInformation( m_Input );
-		m_Posteriors[c]->Allocate();
-		m_Posteriors[c]->FillBuffer(0.0);
-		m_Posteriors[c]->Update();
-	}
-
-	this->GenerateData();
+void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::SetMaximumIteration(int numberOfIterations) {
+	m_MaxIteration = numberOfIterations;
 }
+
+template <class TInputVectorImage, class TProbabilityPixelType>
+int ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetMaximumIteration() const {
+	return m_MaxIteration;
+}
+
+template <class TInputVectorImage, class TProbabilityPixelType>
+void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::SetInitialProportions(ProportionVectorType & proportions) {
+	m_InitialProportions = proportions;
+}
+
+template <class TInputVectorImage, class TProbabilityPixelType>
+const typename ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ProportionVectorType &
+ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetInitialProportions() const {
+	return m_InitialProportions;
+}
+
+template <class TInputVectorImage, class TProbabilityPixelType>
+const typename ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ProportionVectorType &
+ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetProportions() const {
+	return m_Proportions;
+}
+
+template <class TInputVectorImage, class TProbabilityPixelType>
+int ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::AddComponent(ComponentType *component) {
+	m_ComponentVector.push_back(component);
+	return static_cast<int>(m_ComponentVector.size());
+}
+
+template <class TInputVectorImage, class TProbabilityPixelType>
+unsigned int ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetNumberOfComponents() const {
+	return m_ComponentVector.size();
+}
+
+template <class TInputVectorImage, class TProbabilityPixelType>
+typename ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::TERMINATION_CODE
+ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetTerminationCode() const {
+	return m_TerminationCode;
+}
+
+template <class TInputVectorImage, class TProbabilityPixelType>
+typename ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ComponentMembershipFunctionType *
+ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetComponentMembershipFunction(int componentIndex) const {
+	return (m_ComponentVector[componentIndex])->GetMembershipFunction();
+}
+
 } // end of namespace Statistics
 } // end of namespace itk
 

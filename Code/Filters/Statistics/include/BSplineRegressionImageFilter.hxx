@@ -129,12 +129,12 @@ BSplineRegressionImageFilter< TInputVectorImage >
 
 		unsigned int index = 0;
 
-		ScalarType scalar;
+		typename ChannelImageType::PixelType scalar;
 		PointType point;
 		for ( It.GoToBegin(); !It.IsAtEnd(); ++It ) {
 			channelEstimate->TransformIndexToPhysicalPoint( It.GetIndex(), point );
 			if ( !isMasked || m_MaskImage->GetPixel( It.GetIndex() ) > 0 ) {
-				scalar[0] = It.Get();
+				scalar = It.Get();
 				weights->InsertElement( index, 1.0 );
 				fieldPoints->SetPointData( index, scalar );
 				fieldPoints->SetPoint( index, point );
