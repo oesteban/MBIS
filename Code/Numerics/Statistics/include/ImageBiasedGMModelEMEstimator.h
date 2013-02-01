@@ -223,10 +223,6 @@ protected:
 
 	bool ExpectationStep();
 
-	double CalculateExpectation() const;
-
-	double GetEnergyValue() const;
-
 	bool UpdateComponentParameters();
 
 	bool UpdateProportions();

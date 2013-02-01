@@ -75,7 +75,7 @@ void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Pri
 	os << indent << "Termination Code: " << this->GetTerminationCode() << std::endl;
 	os << indent << "Initial Proportions: " << this->GetInitialProportions() << std::endl;
 	os << indent << "Proportions: " << this->GetProportions() << std::endl;
-	os << indent << "Calculated Expectation: " << this->CalculateExpectation() << std::endl;
+	os << indent << "Calculated Expectation: " << this->m_CurrentExpectation << std::endl;
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
@@ -208,47 +208,6 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Exp
 
 
 	return true;
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-double ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetEnergyValue() const {
-
-
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-double ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::CalculateExpectation() const {
-	double sum = 0.0;
-
-	if (m_Sample) {
-		unsigned int measurementVectorIndex;
-		SizeValueType size = m_Sample->Size();
-		double logProportion;
-		double temp;
-		for (size_t componentIndex = 0; componentIndex < m_ComponentVector.size(); ++componentIndex) {
-			temp = m_Proportions[componentIndex];
-
-			// if temp is below the smallest positive double number
-			// the log may blow up
-			if (temp > NumericTraits<double>::epsilon()) {
-				logProportion = vcl_log(temp);
-			} else {
-				logProportion = NumericTraits<double>::NonpositiveMin();
-			}
-
-			for (measurementVectorIndex = 0; measurementVectorIndex < size; measurementVectorIndex++) {
-				temp = m_ComponentVector[componentIndex]->GetWeight(measurementVectorIndex);
-
-				if (temp > NumericTraits<double>::epsilon()) {
-					sum += temp * (logProportion + vcl_log(temp));
-				} else {
-					// let's throw an exception
-                    itkExceptionMacro( << "temp is null" );
-				}
-			}
-		}
-	}
-	return sum;
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
