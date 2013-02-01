@@ -65,7 +65,8 @@ MultispectralEMFilter< TInputComponent, TProbabilityPixelType >
  m_UsePriorProbabilityImages(false),
  m_IsInitialized(false),
  m_UseOnlyClassify(false),
- m_UseExplicitPVModel( false )
+ m_UseExplicitPVModel( false ),
+ m_MaxBiasEstimationIterations( 5 )
 {
 	// At least 1 inputs is necessary for a vector image.
 	this->SetNumberOfRequiredInputs(0);
@@ -171,6 +172,7 @@ void MultispectralEMFilter< TInputComponent, TProbabilityPixelType >
 	m_Estimator->SetInput(m_Input);
 	m_Estimator->SetMaskImage( m_MaskImage );
 	m_Estimator->SetMaximumIteration(m_MaximumIteration);
+	m_Estimator->SetMaxBiasEstimationIterations( m_MaxBiasEstimationIterations );
 	m_Estimator->SetUseBiasCorrection(m_UseBiasCorrection);
 	m_Estimator->SetInitialProportions( m_InitialProportions );
     for ( unsigned int i = 0 ; i < m_NumberOfClasses ; i++ ) {

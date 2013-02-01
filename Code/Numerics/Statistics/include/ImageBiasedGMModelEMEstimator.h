@@ -215,6 +215,9 @@ public:
 	itkGetConstMacro(UseBiasCorrection, bool);
 	itkSetMacro(UseBiasCorrection, bool);
 
+	itkSetClampMacro(MaxBiasEstimationIterations,size_t,1,25);
+	itkGetMacro( MaxBiasEstimationIterations, size_t );
+
 protected:
 	ImageBiasedGMModelEMEstimator();
 	virtual ~ImageBiasedGMModelEMEstimator() {
@@ -238,6 +241,7 @@ private:
 
 	int m_MaxIteration;
 	int m_CurrentIteration;
+	size_t m_MaxBiasEstimationIterations;
 
 	TERMINATION_CODE m_TerminationCode;
 	ComponentVectorType m_ComponentVector;

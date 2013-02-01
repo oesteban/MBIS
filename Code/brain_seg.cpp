@@ -547,6 +547,7 @@ int main(int argc, char **argv) {
 		em_filter->SetMaskImage( bm );
 		em_filter->SetNumberOfClasses( nClasses );
 		em_filter->SetMaximumIteration( emIterations );
+		em_filter->SetMaxBiasEstimationIterations( 5 );
 		em_filter->SetInputVector( input );
 		em_filter->SetInitialParameters( initialParameters );
 		em_filter->SetUseExplicitPVModel( useExplicitPVE );

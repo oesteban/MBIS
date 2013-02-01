@@ -61,6 +61,7 @@ ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ImageBia
 	m_MaxIteration = 100;
 	m_UseBiasCorrection = true;
 	m_CurrentExpectation = itk::NumericTraits< double >::max();
+	m_MaxBiasEstimationIterations = 5;
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
@@ -389,8 +390,7 @@ void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Gen
 		// E-step
 		this->ExpectationStep();
 
-
-		if( m_UseBiasCorrection ) // Bias field estimation
+		if( m_UseBiasCorrection && m_MaxBiasEstimationIterations > m_CurrentIteration ) // Bias field estimation
 			this->UpdateBiasFieldEstimate();
 
 		// M-step
