@@ -58,6 +58,8 @@
 #include <itkBinaryThresholdImageFilter.h>
 #include <itkCastImageFilter.h>
 #include <itkThresholdImageFilter.h>
+#include <itkLabelImageToLabelMapFilter.h>
+#include <itkLabelMapMaskImageFilter.h>
 
 #include <itkSubtractImageFilter.h>
 #include <itkMultiplyImageFilter.h>

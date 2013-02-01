@@ -60,7 +60,12 @@ ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ImageBia
 	m_Sample = 0;
 	m_MaxIteration = 100;
 	m_UseBiasCorrection = true;
+<<<<<<< HEAD
 	m_BiasCorrectionStopped = false;
+=======
+	m_CurrentExpectation = itk::NumericTraits< double >::max();
+	m_MaxBiasEstimationIterations = 5;
+>>>>>>> master
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
@@ -75,7 +80,7 @@ void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Pri
 	os << indent << "Termination Code: " << this->GetTerminationCode() << std::endl;
 	os << indent << "Initial Proportions: " << this->GetInitialProportions() << std::endl;
 	os << indent << "Proportions: " << this->GetProportions() << std::endl;
-	os << indent << "Calculated Expectation: " << this->CalculateExpectation() << std::endl;
+	os << indent << "Calculated Expectation: " << this->m_CurrentExpectation << std::endl;
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
@@ -129,38 +134,37 @@ ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::GetCompo
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
-bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::CalculateDensities() {
-	// Formula (25) in Bach2005. A posteriori probabilities
-	bool componentModified = false;
+bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ExpectationStep() {
+	// Reset expectation
+	m_CurrentExpectation = 0.0;
 
-	for (size_t i = 0; i < m_ComponentVector.size(); i++) {
+	size_t numberOfComponents = m_ComponentVector.size();
+
+	// Check for changes in the model.
+	bool componentModified = false;
+	for (size_t i = 0; i < numberOfComponents; i++) {
 		if ((m_ComponentVector[i])->AreParametersModified()) {
 			componentModified = true;
 			break;
 		}
 	}
+	if (!componentModified)	return false; // No change => Stop algorithm
 
-	if (!componentModified) {
-		return false;
-	}
-
-	double temp;
-	size_t numberOfComponents = m_ComponentVector.size();
 	std::vector<double> tempWeights(numberOfComponents, 0.);
 	double uniformWeight = 1.0 / numberOfComponents;
 
-	typename InputSampleType::ConstIterator last = m_Sample->End();
 
-	typedef typename InputSampleType::AbsoluteFrequencyType FrequencyType;
-	FrequencyType frequency;
-	FrequencyType zeroFrequency = NumericTraits < FrequencyType > ::Zero;
-	typename InputSampleType::MeasurementVectorType yVector;
 	double density;
 	double densitySum;
 	double totalDensitySum;
 	double minDouble = NumericTraits<double>::epsilon();
-
+	MeasurementVectorType yVector;
 	SizeValueType measurementVectorIndex = 0;
+
+	typename InputSampleType::ConstIterator last = m_Sample->End();
+	typedef typename InputSampleType::AbsoluteFrequencyType FrequencyType;
+	FrequencyType frequency;
+	FrequencyType zeroFrequency = NumericTraits < FrequencyType > ::Zero;
 
 	for (typename InputSampleType::ConstIterator iter = m_Sample->Begin(); iter != last; ++iter, ++measurementVectorIndex) {
 		yVector = iter.GetMeasurementVector();
@@ -170,7 +174,6 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Cal
 		for (size_t x = 0; x < numberOfComponents; ++x) {
 			double Px = m_Proportions[x];
 			double Py_x = m_ComponentVector[x]->Evaluate(yVector);
-
 			// This is P(x) * P(y=yVector|x, theta )
 			tempWeights[x] = Px * Py_x;
 		}
@@ -179,6 +182,13 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Cal
 		for (size_t x = 0; x < numberOfComponents; ++x)
 			densitySum += tempWeights[x];
 
+
+		//m_CurrentExpectation += m_ComponentVector[k]->EvaluateEnergy(yVector);
+		m_CurrentExpectation += vcl_log(densitySum);
+
+		double maxWeight = 0.0;
+		double temp;
+		size_t k = 0;
 		for (size_t x = 0; x < numberOfComponents; ++x) {
 			temp = tempWeights[x];
 
@@ -189,49 +199,20 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Cal
 				temp = uniformWeight;
 			}
 
+			if ( temp > maxWeight ) {
+				maxWeight = temp;
+				k = x;
+			}
+
 			// Save weight
-			// m_Ptly[measurementVectorIndex][x] = temp;
 			*(m_Posteriors[x]->GetBufferPointer() + iter.GetInstanceIdentifier()) = temp;
 		}
 	}
 
+	m_CurrentExpectation = m_CurrentExpectation / (double) (measurementVectorIndex+1);
+
 
 	return true;
-}
-
-template <class TInputVectorImage, class TProbabilityPixelType>
-double ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::CalculateExpectation() const {
-	double sum = 0.0;
-
-	if (m_Sample) {
-		unsigned int measurementVectorIndex;
-		SizeValueType size = m_Sample->Size();
-		double logProportion;
-		double temp;
-		for (size_t componentIndex = 0; componentIndex < m_ComponentVector.size(); ++componentIndex) {
-			temp = m_Proportions[componentIndex];
-
-			// if temp is below the smallest positive double number
-			// the log may blow up
-			if (temp > NumericTraits<double>::epsilon()) {
-				logProportion = vcl_log(temp);
-			} else {
-				logProportion = NumericTraits<double>::NonpositiveMin();
-			}
-
-			for (measurementVectorIndex = 0; measurementVectorIndex < size; measurementVectorIndex++) {
-				temp = m_ComponentVector[componentIndex]->GetWeight(measurementVectorIndex);
-
-				if (temp > NumericTraits<double>::epsilon()) {
-					sum += temp * (logProportion + vcl_log(temp));
-				} else {
-					// let's throw an exception
-                    itkExceptionMacro( << "temp is null" );
-				}
-			}
-		}
-	}
-	return sum;
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
@@ -419,10 +400,10 @@ void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Gen
 		m_CurrentIteration = iteration;
 
 		// E-step
-		this->CalculateDensities();
+		this->ExpectationStep();
 
-
-		if( m_UseBiasCorrection && !m_BiasCorrectionStopped) // Bias field estimation
+		//if( m_UseBiasCorrection && !m_BiasCorrectionStopped) // Bias field estimation
+		if( m_UseBiasCorrection && m_MaxBiasEstimationIterations > m_CurrentIteration ) // Bias field estimation
 			this->UpdateBiasFieldEstimate();
 
 		// M-step
@@ -433,9 +414,8 @@ void ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Gen
 			break;
 		}
 
-
 		// TODO Throw iteration event
-		std::cout << "Iteration " << iteration << std::endl;
+		std::cout << "Iteration " << iteration << " - E[log-L]=" << m_CurrentExpectation << std::endl;
 		for (unsigned int i = 0; i < m_ComponentVector.size(); i++) {
 			std::cout << "\tClass[" << i << "," << m_Proportions[i] << "]: " << m_ComponentVector[i]->GetFullParameters() << std::endl;
 

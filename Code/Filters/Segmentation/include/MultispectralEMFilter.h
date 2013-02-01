@@ -166,8 +166,11 @@ public:
 	/** Run-time type information (and related methods). */
 	itkTypeMacro(MultispectralEMFilter, MultispectralFilter);
 
-    itkSetMacro(MaximumIteration, unsigned int);
-    itkGetConstMacro(MaximumIteration, unsigned int);
+    itkSetMacro(MaximumIteration, size_t);
+    itkGetConstMacro(MaximumIteration, size_t);
+
+    itkSetClampMacro(MaxBiasEstimationIterations, size_t, 1, 25);
+    itkGetConstMacro(MaxBiasEstimationIterations, size_t);
 
     itkSetMacro(UsePriorProbabilityImages, bool);
     itkGetConstMacro(UsePriorProbabilityImages, bool);
@@ -238,7 +241,8 @@ private:
 	typename InputSampleType::Pointer         m_Sample;
 
 	typename EstimatorType::Pointer           m_Estimator;
-	unsigned int                              m_MaximumIteration;
+	size_t                                    m_MaximumIteration;
+	size_t                                    m_MaxBiasEstimationIterations;
 	bool                                      m_UsePriorProbabilityImages;
 
 	ParametersVectorType                      m_InitialParameters;

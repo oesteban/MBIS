@@ -217,15 +217,16 @@ public:
 	itkGetConstMacro(UseBiasCorrection, bool);
 	itkSetMacro(UseBiasCorrection, bool);
 
+	itkSetClampMacro(MaxBiasEstimationIterations,size_t,1,25);
+	itkGetMacro( MaxBiasEstimationIterations, size_t );
+
 protected:
 	ImageBiasedGMModelEMEstimator();
 	virtual ~ImageBiasedGMModelEMEstimator() {
 	}
 	void PrintSelf(std::ostream & os, Indent indent) const;
 
-	bool CalculateDensities();
-
-	double CalculateExpectation() const;
+	bool ExpectationStep();
 
 	bool UpdateComponentParameters();
 
@@ -242,6 +243,7 @@ private:
 
 	int m_MaxIteration;
 	int m_CurrentIteration;
+	size_t m_MaxBiasEstimationIterations;
 
 	TERMINATION_CODE m_TerminationCode;
 	ComponentVectorType m_ComponentVector;
@@ -261,7 +263,8 @@ private:
 	InputVectorPointer           m_BiasLog;
 	InputVectorPointer           m_CurrentBias;
 	bool                         m_UseBiasCorrection;
-	bool                         m_BiasCorrectionStopped;
+	//bool                         m_BiasCorrectionStopped;
+	double                       m_CurrentExpectation;
 
 }; // end of class
 

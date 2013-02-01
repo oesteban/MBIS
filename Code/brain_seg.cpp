@@ -266,15 +266,37 @@ int main(int argc, char **argv) {
 		ChannelPointer p = r->GetOutput();
 		r->Update();
 
-		StatisticsChannelFilterType::Pointer calc = StatisticsChannelFilterType::New();
-		calc->SetInput(p);
-		calc->Update();
-		ChannelPixelType max = calc->GetMaximum();
-		ChannelPixelType min = calc->GetMinimum();
+		ChannelPixelType max = itk::NumericTraits< ChannelPixelType >::max();
+		ChannelPixelType min = 0.0;
+		ChannelPixelType absMin = 0.0;
+
+		if ( bm.IsNotNull() ) {
+			ProbabilityPixelType* mBuff = bm->GetBufferPointer();
+			ChannelPixelType* cBuff = r->GetOutput()->GetBufferPointer();
+			size_t nPix = bm->GetLargestPossibleRegion().GetNumberOfPixels();
+			std::vector< ChannelPixelType > sample;
+
+			for( size_t i = 0; i<nPix; i++ ) {
+				if ( *(mBuff+i) > 0 ) {
+					sample.push_back( *(cBuff+i) );
+				}
+			}
+			std::sort( sample.begin(), sample.end() );
+			max = sample[ (size_t) ((sample.size()-1)*0.98) ];
+			min = sample[ (size_t) ((sample.size()-1)*0.02) ];
+			absMin = sample[0];
+		} else {
+			StatisticsChannelFilterType::Pointer calc = StatisticsChannelFilterType::New();
+			calc->SetInput(p);
+			calc->Update();
+			max = calc->GetMaximum();
+			min = calc->GetMinimum();
+			absMin = min;
+		}
 
 		if( !skipNormalization ) {
 			double factor = NORM_MAX_INTENSITY / (max - min);
-			double constant = - factor * min;
+			double constant = - factor * absMin;
 
 			if ( factor!= 1 ) {
 				typename MultiplyFilter::Pointer multiplier = MultiplyFilter::New();
@@ -459,15 +481,6 @@ int main(int argc, char **argv) {
 		kmeans->Compute();
 		initialParameters = kmeans->GetOutputParameters();
 
-		if ( doOutputSteps ) {
-			kmeans->Update();
-			solution = kmeans->GetOutput();
-			ClassifiedImageWriter::Pointer w = ClassifiedImageWriter::New();
-			w->SetInput( solution );
-			w->SetFileName(outPrefix + "_km." + outExt );
-			w->Update();
-		}
-
 		if (doOutputStats) {
 			stringstream s;
 			s << outPrefix << "_stats_kmeans.csv";
@@ -493,7 +506,7 @@ int main(int argc, char **argv) {
 		if ( doOutputSteps ) {
 			ClassifiedImageWriter::Pointer w = ClassifiedImageWriter::New();
 			w->SetInput( solution );
-			w->SetFileName(outPrefix + "_MLClassified." + outExt );
+			w->SetFileName(outPrefix + "_means." + outExt );
 			w->Update();
 		}
 
@@ -538,6 +551,7 @@ int main(int argc, char **argv) {
 		em_filter->SetMaskImage( bm );
 		em_filter->SetNumberOfClasses( nClasses );
 		em_filter->SetMaximumIteration( emIterations );
+		em_filter->SetMaxBiasEstimationIterations( 5 );
 		em_filter->SetInputVector( input );
 		em_filter->SetInitialParameters( initialParameters );
 		em_filter->SetUseExplicitPVModel( useExplicitPVE );
