@@ -47,7 +47,6 @@
 #include <itkNumericTraits.h>
 #include <itkImageDuplicator.h>
 #include "ImageBiasedGMModelEMEstimator.h"
-#include "VectorImageFileWriter.h"
 
 namespace mfbs {
 namespace Statistics {
@@ -60,12 +59,10 @@ ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::ImageBia
 	m_Sample = 0;
 	m_MaxIteration = 100;
 	m_UseBiasCorrection = true;
-<<<<<<< HEAD
-	m_BiasCorrectionStopped = false;
-=======
+//	m_BiasCorrectionStopped = false;
+
 	m_CurrentExpectation = itk::NumericTraits< double >::max();
 	m_MaxBiasEstimationIterations = 5;
->>>>>>> master
 }
 
 template <class TInputVectorImage, class TProbabilityPixelType>
@@ -332,9 +329,19 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	logModel->SetInput( modelFilter->GetOutput() );
 	logModel->Update();
 
+	typename VectorWriter::Pointer w0 = VectorWriter::New();
+	w0->SetInput( logModel->GetOutput() );
+	w0->SetFileName( "biasLogModel.nii.gz" );
+	w0->Update();
+
 	typename LogFilter::Pointer logInput = LogFilter::New();
 	logInput->SetInput( m_CorrectedInput );
 	logInput->Update();
+
+	typename VectorWriter::Pointer w1 = VectorWriter::New();
+	w1->SetInput( logInput->GetOutput() );
+	w1->SetFileName( "biasLogInput.nii.gz" );
+	w1->Update();
 
 	// Subtract current bias field
 	typename SubtractFilter::Pointer subFilter = SubtractFilter::New();
@@ -342,10 +349,15 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	subFilter->SetInput2( logModel->GetOutput() );
 	subFilter->Update();
 
+	typename VectorWriter::Pointer w2 = VectorWriter::New();
+	w2->SetInput( subFilter->GetOutput() );
+	w2->SetFileName( "biasError.nii.gz" );
+	w2->Update();
+
 	// Estimate log bias function
 	typename FieldEstimatorFilter::Pointer biasEstimator = FieldEstimatorFilter::New();
 	typename FieldEstimatorFilter::ArrayType n;
-	n.Fill( 6 );
+	n.Fill( 5 );
 	biasEstimator->SetNumberOfControlPoints( n );
 	biasEstimator->SetInput( subFilter->GetOutput() );
 	if ( m_MaskImage.IsNotNull() )
@@ -355,6 +367,11 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	}
 	biasEstimator->Update();
 
+	typename VectorWriter::Pointer w3 = VectorWriter::New();
+	w3->SetInput( biasEstimator->GetOutput() );
+	w3->SetFileName( "biasErrorEstimated.nii.gz" );
+	w3->Update();
+
 	typename FieldNormalizerFilter::Pointer biasNormalizer = FieldNormalizerFilter::New();
 	biasNormalizer->SetReferenceImage( subFilter->GetOutput() );
 	biasNormalizer->SetNormalizeImage( biasEstimator->GetOutput() );
@@ -362,6 +379,11 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	if ( m_MaskImage.IsNotNull() )
 		biasNormalizer->SetMaskImage( m_MaskImage );
 	biasNormalizer->Update();
+
+	typename VectorWriter::Pointer w4 = VectorWriter::New();
+	w4->SetInput( biasNormalizer->GetOutput() );
+	w4->SetFileName( "biasErrorEstimatedNormalized.nii.gz" );
+	w4->Update();
 
 	// Correct Input Image
 	typename SubtractFilter::Pointer correct = SubtractFilter::New();
@@ -374,6 +396,11 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Upd
 	exp->SetInput( correct->GetOutput() );
 	exp->Update();
 	m_CorrectedInput = exp->GetOutput();
+
+	typename VectorWriter::Pointer w5 = VectorWriter::New();
+	w5->SetInput( m_CorrectedInput );
+	w5->SetFileName( "biasCorrected.nii.gz" );
+	w5->Update();
 
 	// Set new reference to sample
 	m_Sample->SetImage( m_CorrectedInput );

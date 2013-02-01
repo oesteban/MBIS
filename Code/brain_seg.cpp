@@ -554,7 +554,7 @@ int main(int argc, char **argv) {
 		em_filter->SetMaxBiasEstimationIterations( 5 );
 		em_filter->SetInputVector( input );
 		em_filter->SetInitialParameters( initialParameters );
-		em_filter->SetUseExplicitPVModel( useExplicitPVE );
+		//em_filter->SetUseExplicitPVModel( useExplicitPVE );
 		em_filter->SetUseBiasCorrection( !skipBias );
 
 		if ( atlas.size() != 0 ) {

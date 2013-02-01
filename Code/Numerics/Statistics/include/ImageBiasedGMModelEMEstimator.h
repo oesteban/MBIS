@@ -55,6 +55,7 @@
 #include "BSplineRegressionImageFilter.h"
 #include "GenerateModelImageFilter.h"
 #include "NormalizeToModelImageFilter.h"
+#include "VectorImageFileWriter.h"
 
 using namespace itk;
 
@@ -238,6 +239,8 @@ protected:
 	void GenerateData();
 
 private:
+	typedef mfbs::VectorImageFileWriter< InputVectorImageType >  VectorWriter;
+
 	/** Target data sample pointer*/
 	typename InputSampleType::Pointer         m_Sample;
 
