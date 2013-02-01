@@ -221,7 +221,7 @@ protected:
 	}
 	void PrintSelf(std::ostream & os, Indent indent) const;
 
-	bool CalculateDensities();
+	bool ExpectationStep();
 
 	double CalculateExpectation() const;
 
@@ -261,7 +261,7 @@ private:
 	InputVectorPointer           m_BiasLog;
 	InputVectorPointer           m_CurrentBias;
 	bool                         m_UseBiasCorrection;
-	double                       m_CurrentEnergy;
+	double                       m_CurrentExpectation;
 
 }; // end of class
 
