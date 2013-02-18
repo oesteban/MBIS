@@ -160,7 +160,7 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Exp
 	typename InputSampleType::ConstIterator last = m_Sample->End();
 	typedef typename InputSampleType::AbsoluteFrequencyType FrequencyType;
 	FrequencyType frequency;
-	FrequencyType zeroFrequency = NumericTraits < FrequencyType > ::Zero;
+	FrequencyType zeroFrequency = itk::NumericTraits< FrequencyType >::Zero;
 
 	for (typename InputSampleType::ConstIterator iter = m_Sample->Begin(); iter != last; ++iter, ++measurementVectorIndex) {
 		yVector = iter.GetMeasurementVector();
@@ -168,18 +168,17 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Exp
 
 		// For every x belonging Lpm
 		for (size_t x = 0; x < numberOfComponents; ++x) {
-			double Px = m_Proportions[x];
+			double pi_k = m_Proportions[x];
 			double Py_x = m_ComponentVector[x]->Evaluate(yVector);
-			// This is P(x) * P(y=yVector|x, theta )
-			tempWeights[x] = Px * Py_x;
+			// This is pi_k * P(y=yVector|x=k, theta_k )
+			tempWeights[x] = pi_k * Py_x;
 		}
 
 		// This is the denominator of (25) in Bach2005
 		for (size_t x = 0; x < numberOfComponents; ++x)
 			densitySum += tempWeights[x];
 
-
-		//m_CurrentExpectation += m_ComponentVector[k]->EvaluateEnergy(yVector);
+		// Bishop2006. Eq 9.14.
 		m_CurrentExpectation += vcl_log(densitySum);
 
 		double maxWeight = 0.0;
@@ -198,16 +197,13 @@ bool ImageBiasedGMModelEMEstimator<TInputVectorImage,TProbabilityPixelType>::Exp
 			if ( temp > maxWeight ) {
 				maxWeight = temp;
 				k = x;
+
 			}
 
 			// Save weight
 			*(m_Posteriors[x]->GetBufferPointer() + iter.GetInstanceIdentifier()) = temp;
 		}
 	}
-
-	m_CurrentExpectation = m_CurrentExpectation / (double) (measurementVectorIndex+1);
-
-
 	return true;
 }
 
