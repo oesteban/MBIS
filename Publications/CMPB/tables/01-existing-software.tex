@@ -1,0 +1,19 @@
+% @Author: oesteban
+% @Date:   2014-03-26 15:40:27
+% @Last Modified by:   oesteban
+% @Last Modified time: 2014-03-26 15:55:12
+\begin{tabularx}{\textwidth}{l|ZZZZZZ||Z}
+\hline
+              & \acrshort*{fast} & \acrshort*{spm} & \acrshort*{leemput_ems}     & ATROPOS    & NiftySeg & Freesurfer & \gls*{mbis} \\
+\hline
+%               FSL          SPM        EMS           ATROPOS      NIFTYSEG      FS    MBIS
+Multivariate  & Partial    & Partial$^{1}$ & Full       & Full      &  Full      & No  & Full \\
+Optimization  & \acrshort*{icm}  & \acrshort*{icm} & \acrshort*{montecarlo}& \acrshort*{icm}  & Unknown   & \acrshort*{icm} & \acrshort*{graph_cuts} \\
+Bias model    & Polynomial & \acrshort*{dct} & Polynomial & No$^{3}$  & Unknown & No$^{3}$ & B-spline \\
+Atlas usage   & Available  & Intensive & Available  & Available &  Intensive & Intensive & Available \\
+License       & GPL        & GPL       & BSD-like   & BSD       &  BSD       & Freeware & GPL \\
+Platform      & Unix       & Matlab    & SPM8       & Any$^{2}$       &  Any$^{2}$       & Unix & Any$^{2}$ \\
+Reference     & \citep{zhang_segmentation_2001} & \citep{ashburner_unified_2005} & \citep{van_leemput_unifying_2003} & \citep{avants_open_2011} & \citep{cardoso_niftyseg:_2012} & 
+\citep{fischl_whole_2002} & \\
+\hline
+\end{tabularx}

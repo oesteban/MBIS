@@ -1,0 +1,85 @@
+\begin{landscape}
+\section{Data}\label{a:data}
+
+\begin{table*}[!h]
+\caption[Datasets]{Data resources used in this work\label{table:data}}
+\rowcolors{2}{white}{lightgray}
+\begin{minipage}{\linewidth}
+\footnotesize
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\renewcommand\multirowsetup{\raggedright}
+\input{tables/03-data.tex}
+$^{1}$ \url{http://www.bic.mni.mcgill.ca/brainweb/}, simulated dataset. \\
+$^{2}$ \url{http://www.nitrc.org/projects/multimodal}, Achieva 3T Scanner (Philips Healthcare, Best, The Netherlands). \\
+$^{3}$ \url{http://brain-development.org/index.php?n=Main.Datasets}, Multi-site study (several scanning systems). \\
+\end{minipage}
+\end{table*}
+\end{landscape}
+
+\newpage
+\section{Optimization algorithms}\label{a:algorithms}
+
+\begin{algorithm}[h]
+\begin{enumerate}
+\item[] \textbf{Initialization}.
+Choose the best initialization for the model,
+  $\lbrace \pi_{k,i}, \theta_k \rbrace^{(t=0)}$.
+ 
+\bitem{Expectation Step}
+Compute the \emph{posterior densities} $\gamma_{k,i}^{(t)}$ \eqref{eq:post_density}.
+ 
+\bitem{Bias correction} %
+Estimate $E$ as in \eqref{eq:bias_error} and perform the approximation
+  of the smooth function, obtaining $B$.
+Finally, set $\vy_i^{(t)} = \vy_i^{(t-1)} - \vec{b}_i^{(t)}$, to correct data for
+  the last estimation of bias.
+ 
+\bitem{Maximization Step}
+  Estimate new parameters for the model, using the following update equations:
+  
+  \begin{equation*}
+  \begin{aligned}
+  \label{eq:m_step}
+  \boldsymbol{\mu}_{k}^{(t)}&=\frac{1}{N_k} \, \underset{\forall i}\sum \gamma_{k,i}^{(t-1)} \, \vy_{i}\,, \\
+  \boldsymbol{\Sigma}_{k}^{(t)}&=\frac{1}{N_k} \, \underset{\forall i}\sum \gamma_{k,i}^{(t-1)} \, (\vy_{i}-\boldsymbol{\mu}_{k}^{(t)})\,(\vy_{i}-\boldsymbol{\mu}_{k}^{(t)})^{T} \\
+  \textrm{with} &\; N_k = \sum_{\forall i \in S} \gamma_{k,i}^{(t-1)}.
+  \end{aligned}
+  \end{equation*}
+
+\item[] \textbf{Repeat} steps 1-3 until convergence.
+\end{enumerate}
+\caption{The \gls*{e_m} algorithm}\label{alg:e_m}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{$\alpha\beta$-Swap algorithm, as proposed by \cite{boykov_fast_2001}}
+\label{alg:swap}
+\begin{minipage}{\textwidth}
+\begin{algorithmic}[1]
+	\REQUIRE Arbitrary initial labeling $X$
+	\STATE success $\leftarrow$ \FALSE
+	\WHILE { success $\neq$ \TRUE }
+		\FORALL{ pair of labels $\left\lbrace\alpha,\beta\right\rbrace$ } 
+			\STATE Find $\hat{X}= \textrm{argmin} \left\lbrace E(X') \right\rbrace $ among $X'$ within one $\alpha-\beta$ swap of $X$
+			\IF { $E(\hat{X}) < E({X})$ }
+				\STATE $X \leftarrow \hat{X}$
+			\ELSE
+				\STATE success $\leftarrow$ \TRUE
+			\ENDIF
+		\ENDFOR
+	\ENDWHILE
+	\RETURN $f$
+\end{algorithmic}
+\noindent \rule{\textwidth}{0.4pt}
+
+\footnotesize
+\noindent
+Given a label $\alpha$, an $\alpha$-expansion move is a change of a number
+  of image pixels from any original label to $\alpha$.
+Equivalently, given a pair of labels $\alpha,\beta$, an
+  $\alpha\beta$-swap is a move where a number of pixels 
+  with label $\alpha$ change to $\beta$ and 
+  a number of pixels previously labeled $\beta$ change to $\alpha$.
+\end{minipage}
+\end{algorithm}

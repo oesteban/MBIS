@@ -1,0 +1,251 @@
+%\documentclass[final,12pt]{elsarticle}
+\documentclass[final,3p,times,twocolumn]{elsarticle}
+%% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage{etoolbox}
+\newbool{submit}
+\booltrue{submit}
+
+\usepackage{placeins}
+\usepackage{graphicx}
+\usepackage{ifpdf}
+\ifpdf
+   \usepackage{epstopdf}
+   \epstopdfsetup{suffix=}
+   \DeclareGraphicsRule{.eps}{pdf}{.pdf}{`epstopdf #1}
+   \pdfcompresslevel=9
+\else
+   \DeclareGraphicsRule{.pdf}{eps}{.eps}{`convert #1}
+   \usepackage{graphicx}
+\fi
+
+\usepackage[acronym]{glossaries}
+\usepackage[table,usenames,dvipsnames]{xcolor}
+\usepackage{nameref}
+\usepackage{tabularx}
+
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+
+%% My packages
+\usepackage{mathptmx} % use Times fonts if available on your TeX system
+\usepackage{amssymb,amsmath,amstext}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\DeclareMathAlphabet{\bm}{OT1}{ptm}{b}{it}
+
+\usepackage[format=hang,font=small,labelfont=bf]{caption}
+\usepackage{subscript}
+\usepackage{multirow}
+\usepackage{algorithm}
+\def\algorithmautorefname{Algorithm}
+\def\subsectionautorefname{section}
+
+\usepackage{algorithmic}
+\usepackage{listings}
+
+\usepackage{subfigure}
+\def\subfigureautorefname{Figure}
+\usepackage{relsize}
+\usepackage{lscape}
+\usepackage[abs]{overpic}
+
+\ifbool{submit}
+{
+  \newcommand{\todo[2]}{}
+}
+{
+  \usepackage[colorinlistoftodos]{todonotes}
+  \usepackage[nolists]{endfloat}
+  \renewcommand{\efloatseparator}{\mbox{}}
+  \usepackage[marginparwidth=1.2in]{geometry}
+}
+
+\usepackage[hyphens]{url}
+\usepackage[hidelinks]{hyperref}
+
+\usepackage{natbib}
+\biboptions{sort&compress}
+\definecolor{lightgray}{gray}{0.95}
+
+\lstset{
+	basicstyle=\scriptsize\ttfamily,
+	tabsize=2,
+	extendedchars=true,
+	breaklines=true,
+	showspaces=false,
+	showtabs=false,
+	backgroundcolor=\color{lightgray},
+	captionpos=b,
+	frame=tb
+}
+\sloppy
+
+\newcolumntype{Z}{>{\centering\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+%\newcolumntype{Z}[1]{>{\hsize=#1\hsize\raggedright\arraybackslash}X}%
+%\newcolumntype{C}[1]{>{\hsize=#1\hsize\centering\arraybackslash}X}%
+
+
+\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
+\newcommand{\degree}{\ensuremath{^{\circ}}}
+
+\graphicspath{{./figures/}}
+
+\journal{Comput. Meth. Prog. Bio.}
+
+\makeatletter
+\let\x@caption\caption % original \caption
+\def\x@@caption[#1]#2{\x@caption[{#1}]{\textbf{#1}. #2}} % with optional arg
+\def\x@@@caption#1{\x@caption[{#1}]{#1}} % without optional arg
+\def\caption{\@ifnextchar[\x@@caption\x@@@caption} % new \caption
+\makeatother
+
+\renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\vx}{\vec{x}}
+\newcommand{\vy}{\vec{y}}
+\renewcommand*{\UrlFont}{\ttfamily\smaller\relax}
+\newcommand*{\doi}{\begingroup\catcode`_=12 \addurldoi}
+\newcommand{\addurldoi}[1]{doi: \href{http://dx.doi.org/#1}{\UrlFont#1}\endgroup}
+\newcommand{\emitem}[1]{\item \emph{#1}}
+\newcommand{\bitem}[1]{\item \textbf{#1}.}
+
+\input{09-abbreviations}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for the associated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for the associated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for the associated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%%
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \address{Address\fnref{label3}}
+%% \fntext[label3]{}
+
+\title{MBIS: Multivariate Bayesian Image Segmentation Tool}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{<author name>}
+%% \address[label1]{<address>}
+%% \address[label2]{<address>}
+
+\author[bit,lts5,ciber]{Oscar Esteban\corref{ref1}}
+\ead{code@oscaresteban.es}
+
+\author[bit,ciber]{Gert Wollny}
+\author[lts5]{Subrahmanyam Gorthi}
+\author[bit,ciber]{Mar\'ia-Jes\'us Ledesma-Carbayo}
+\author[lts5,chuv]{Jean-Philippe Thiran}
+\author[bit,ciber]{Andr\'es Santos}
+\author[chuv,lts5]{Meritxell Bach-Cuadra}
+
+
+\cortext[ref1]{Corresponding author. Tel.: +34 915 495 700 ext.4234 }
+
+\address[bit]{Biomedical Image Technologies (BIT), ETSI Telecomunicaci\'on, Universidad Polit\'ecnica de Madrid, Spain}
+\address[lts5]{Signal Processing Laboratory (LTS5), \'Ecole Polytechnique F\'ed\'erale de Lausanne (EPFL), Switzerland}
+\address[chuv]{Department of Radiology, Centre d'Imaginerie Biom\'edicale, University Hospital Center and University of Lausanne, Switzerland}
+\address[ciber]{Biomedical Research Networking Center in Bioengineering, Biomaterials and Nanomedicine (CIBER-BBN), Spain}
+
+
+
+
+%% Text of abstract
+\begin{abstract}
+\label{sec:abstract}
+\input{00-abstract}
+\end{abstract}
+
+\begin{keyword}
+%% keywords here, in the form: keyword \sep keyword
+multivariate \sep reproducible research \sep image segmentation 
+\sep graph-cuts \sep \acrshort*{itk}
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+\MSC[2010] 62P10 \sep 62F15
+%% \PACS{87.19.lf}
+\end{keyword}
+
+\end{frontmatter}
+
+
+%%
+%% Start line numbering here if you want
+%%
+% \linenumbers
+
+%% main text
+\glsresetall[\acronymtype] 
+
+\input{01-introduction}
+
+\input{02-background}
+
+\input{03-implementation}
+
+\input{04-results}
+
+\input{05-conclusions}
+
+\input{06-availability}
+
+\input{07-acknowledgements}
+
+\FloatBarrier
+\bibliographystyle{COMM_3778}
+\bibliography{COMM_3778}
+
+%% The Appendices part is started with the command \appendix;
+%% appendix sections are then done as normal sections
+\newpage
+\onecolumn
+
+% Do not handle tables and figures in appendices with endfloat
+\makeatletter
+\ifbool{submit}
+{}
+{
+  \efloat@restorefloats
+}
+\makeatother
+
+\appendix
+\setcounter{table}{0}
+\setcounter{figure}{0}
+\setcounter{algorithm}{0}
+\renewcommand\thealgorithm{\Alph{section}.\arabic{algorithm}}
+\input{08-appendix}
+
+\ifbool{submit}
+{}
+{
+\newpage
+\setcounter{figure}{0} % Start again
+\renewcommand\thefigure{\arabic{figure}}
+\setcounter{table}{0} % Start again
+\renewcommand\thetable{\arabic{table}}
+}
+
+\end{document}

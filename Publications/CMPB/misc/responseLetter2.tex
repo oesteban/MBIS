@@ -1,0 +1,80 @@
+\documentclass{memoir}
+
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{xcolor}
+\usepackage{xcite}
+\externalcitedocument{main}
+
+\usepackage{url}
+\usepackage{nameref}
+\usepackage[acronym]{glossaries}
+
+\usepackage[hidelinks]{hyperref}
+
+
+\newcounter{reviewpoint}
+\makeatletter
+\newenvironment{reviewpoint}%
+{\refstepcounter{reviewpoint}\par\medskip\vspace{3ex}\hrule\vspace{1.5ex}\par\noindent%
+   {\fontseries{b}\selectfont Comment \arabic{reviewpoint}:} \fontshape{it}\selectfont }
+{\label{com:\thereviewpoint}\par\medskip}
+\def\reviewpointautorefname{Comment}
+\makeatother
+
+
+\newcommand{\reply}{\par\fontshape{n}\selectfont \noindent \textbf{Reply}:\ }
+
+\input{abbreviations}
+
+\begin{document}
+
+\section*{Response letter to final comments}
+
+We would like to thank the reviewer for the helpful comments, we prepared the revision accordingly.
+
+\subsection*{Reviewer 1:}
+\begin{reviewpoint}
+page. 9, line 14
+Should not this http://vision.csd.uwo.ca/code/ be within brackets?
+\reply{Yes, it does. We put it within brackets.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+ page. 9, line 40
+..listed in the table are FAST - I believe should be - ...listed in the table are FAST [42]
+\reply{Citation to FAST added, it was hidden because of a previous appearance (p.3, line 54).}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+page 11, line 22
+``Table A.1 (Appendix B...)'' - should be - ``Table A.1 (Appendix A...)''.
+\reply{Fixed, thanks a lot.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+page 17, line 19-21
+Here it says that WM has a ``quadratic behavior'' that increases to about age 45, and then decreases. Note that what is measured is WM FRACTION (WM ICV). This is not necessarily an effect of WM de facto increases, but rather the ``arithmetically induced correlation'' that occurs due to the WMF and GMF are not independent parameter. When GM disappears faster than WM the fraction of WM artificially seems to increase. The authors points out that it is not their intention to discuss on tissue development over time. So there is really nothing that needs to be discussed explicitly, but I think it was interesting to see this show up in the graph.
+\reply{This is right. In order to reflect the comment, we have added text. Now it reads as follows:
+
+\emph{In addition, we perceive a more ``quadratic'' behavior of the \gls*{wm} fraction:
+  slightly increasing until an age of approximately 45 years and decreasing thereafter.
+{\color{blue} As we studied relative \gls*{icv} fractions, this late decrease effect on \gls*{wm} does 
+  not imply necessarily a reduction of its absolute tissue volume.
+In this regard,} we recall that the aim of this third study was not to show the proven 
+  relationship between tissue volume and subject age.}}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+page 30, Appendix A
+Matrix size missing for T1w in Brainweb, I assume that it is the same as for T2w and PDw as they are registered to one another. But I am not sure?
+\reply{The reviewer is right. We updated the table accordingly.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Although this is outside the scope of your work, I would nevertheless like to suggest that you, when time permits, further investigate the use of your procedures on focal pathologies (MS, tumours such as glioblastomas), as well as the deep GM nuclei.
+\reply{We thank the reviewer for the suggestion. As a matter of fact we intend to participate on the BRATS 2014 Challenge, recently announced as part
+of the upcoming edition of MICCAI (September 14-18, 2014, Boston, MA, US). Some additional lines are also open under a study of MS patients in
+the Advanced Clinical Imaging Technology, Siemens Healthcare Sector IM\&WS S, Lausanne, Switzerland.}
+\end{reviewpoint}
+
+\end{document}

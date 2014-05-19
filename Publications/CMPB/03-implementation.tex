@@ -1,0 +1,196 @@
+\section{Software description}\label{sec:software}
+
+\subsection{Existing software}
+\label{sec:related_work}
+
+Many fully automated brain tissue segmentation tools, based on 
+  Bayesian classifiers, are readily available and widely used.
+In \autoref{table:tools_comparison}, we present a comparison among
+  representative existing tools, along with a brief summary of the
+  unique features of each.
+All the tools make use of the \gls*{multivariate_gaussian} model
+  with \gls*{markov} regularization.
+The tools listed in the table are \gls*{fast} \citep{zhang_segmentation_2001}, 
+  \gls*{spm}, \gls*{leemput_ems}, \emph{ATROPOS} \citep{avants_open_2011},
+  \emph{NiftySeg} \citep{cardoso_niftyseg:_2012}, \emph{Freesurfer} 
+  \citep{fischl_freesurfer_2012},
+  and the software proposed in the present study (\gls*{mbis}).
+The presented tools generally share a base design that follows
+  the flowchart in \autoref{fig:em_flowchart}.
+It is important to note that Freesurfer and \gls*{spm} are not just
+  segmentation utilities, but fully automated pipelines for brain
+  \gls*{mri} processing and analysis that include brain tissue segmentation.
+\Gls*{spm} provides an isolated interface (called \texttt{segment}) for the
+  problem at hand, the methodology of which is described elsewhere
+  \citep{ashburner_unified_2005}.
+Conversely, Freesurfer provides precise \emph{hard} segmentations of the brain
+  in a large number of individual neuroanatomical regions \citep{fischl_whole_2002},
+  which can be appropriately fused to the three-tissue problem.
+The features presented in \autoref{table:tools_comparison} regarding Freesurfer
+  and \gls*{spm} refer only to their whole-brain segmentation processes.
+
+\begin{table*}[!t]
+\begin{minipage}[t]{\linewidth}
+\caption[Brain tissue segmentation tools]{\label{table:tools_comparison}}
+\rowcolors{2}{white}{lightgray}
+\footnotesize
+\input{tables/01-existing-software}
+\footnotesize
+$^{1}$ Work in progress. \\
+$^{2}$ \emph{Any} platform supported by the \emph{CMake} building system.\\
+$^{3}$ The tool does not integrate a bias model, but it is released along with an external tool for correction.\\
+\end{minipage}
+\end{table*}
+
+The first feature to be compared is multivariate implementation.
+\Gls*{leemput_ems}, ATROPOS and NiftySeg fully support the
+\gls*{multivariate_gaussian} model.
+\Acrshort*{spm} is currently integrating support for multivariate
+  data, while \gls*{fast} provides multichannel segmentation that
+  importantly differs from the univariate segmentation methodology.
+Freesurfer only supports \gls*{t1} \gls*{mri} as input for segmentation.
+
+The model estimation is always performed with the \gls*{e_m} algorithm,
+  possibly with some improvements.
+For instance, \gls*{leemput_ems} implements a
+  robust estimator and \gls*{pv} constraints.
+Therefore, this property has been omitted in \autoref{table:tools_comparison}.
+The main differences are found in the \gls*{markov} energy minimization 
+  problem, \gls*{icm} being the most used methodology.
+\Gls*{leemput_ems} implements \acrfull*{montecarlo} sampling, which is more
+  reliable than \gls*{icm} but computationally expensive.
+\Gls*{mbis} is the first tool among the surveyed software packages to include
+  \gls*{graph_cuts} optimization, for which a great trade-off
+  between efficiency and correctness has been proven.
+
+Another important feature is the bias field correction, generally solved by
+  approximation of linear combinations of smooth basis functions.
+\Gls*{fast} and \gls*{leemput_ems} use polynomial least-squares fitting,
+  \gls*{spm} uses the \gls*{dct} with \gls*{lm} optimization, and \gls*{mbis}
+  uses B-splines basis.
+Unfortunately, there was no information available about the bias model
+  implemented in NiftySeg at the time of writing.
+Two of the surveyed tools do not internally integrate a bias model:
+Freesurfer provides a pipeline including a previous correction utility,
+  and ATROPOS advises the prior use N4ITK \citep{tustison_n4itk:_2010}.
+
+The next point of comparison is the use of atlases to initialize the algorithm and/or
+  to aid the estimation of model parameters.
+All the tools can initialize segmentation using prior atlas information.
+Those tools that also use priors throughout the model fitting are denoted
+  with ``intensive'' atlas use in \autoref{table:tools_comparison}.
+
+In terms of software availability, for all the tools the source
+  code is publicly released and the software is distributed under 
+  open-source licenses.
+With respect to their installation, a number of them (\gls*{fast}, \gls*{spm} 
+  and \gls*{leemput_ems}) are platform-dependent, whereas the others
+  are multi-platform using the \emph{CMake} building tool (\url{http://www.cmake.org}).
+
+
+\subsection{Design considerations}\label{sec:design}
+Given the described context of existing software, we aimed to design a
+  multivariate segmentation tool, which is flexible, easy to use, comprehensive,
+  and would also include a \gls*{graph_cuts} solver and a B-spline bias field model.
+As a result we designed \gls*{mbis}, an open-source and cross-platform software that
+  supports multivariate data by design and that integrates all the methods described in
+  \autoref{sec:implementation_details}.
+Segmentation provided with \gls*{mbis} is general purpose.
+In this study, \gls*{mbis} is specifically adapted to the 3D
+  brain tissue segmentation problem.
+In order to facilitate contributions by third-party developers, the code
+  follows the standards of \gls*{itk}, and some interfaces have been defined
+  to integrate new code, preserving the software modularity.
+
+We also promote \emph{reproducible research}, a concept that is drawing increasing
+  interest in parallel to the proliferation of computational solutions
+  for image processing problems.
+Following the definition of \citeauthor{vandewalle_reproducible_2009}
+  \citep{vandewalle_reproducible_2009}, we release here an
+  open-source bundle with evaluation experiments based on open data
+  to help the community replicate and test our work \citep{yoo_open_2005,
+  ibanez_open_2006}.
+  
+In order to evaluate \gls*{mbis} comprehensively, we define three
+  validation targets.
+Consistently with the design considerations mentioned above,
+  we test the performance of \gls*{mbis} with three different
+  open data resources containing multivariate and multi-site
+  data.
+Full details of these databases are provided in \autoref{table:data} 
+  (\ref{a:data}), describing the \gls*{mri} sequences involved and
+  their specific parameters.
+Finally, we address these targets in three different experiments
+  (the results are presented in \autoref{sec:results}).
+
+The first experiment evaluates the accuracy of segmentation, with 
+  comparison to \gls*{fast}, using one simulated dataset.
+The evaluation framework includes tests to calibrate the best
+  parameters for the tool, benchmarks of the bias field estimation,
+  and studies the impact of spatial misalignment between channels.
+The second experiment evaluates the reproducibility of results, in
+  similar settings to a recent validation study \citep{de_boer_accuracy_2010}.
+Unfortunately, the database used by \citeauthor{de_boer_accuracy_2010} is not
+  publicly available.
+Hence, the resulting figures are not directly comparable to their work as
+  we used different data.
+On one hand, we studied the repeatability of the segmentation by analyzing
+  the differences in tissue volumes.
+On the other hand, the overlap indices described in \autoref{sec:evaluation_indices}
+  were evaluated.
+The third section of the evaluation framework is an exemplary pipeline of
+  tissue volume analysis in large-scale databases.
+We illustrated the use of \gls*{mbis} on such applications, segmenting
+  multivariate \gls*{mri} datasets from 584 healthy subjects, and correlating
+  tissue volumes with age.
+
+\subsection{Evaluation framework}
+\label{sec:experimental_framework}
+The evaluation framework is built using \gls*{nipype}, in order to facilitate the
+  fulfillment of the requirements of reproducible research.
+The evaluation includes a \gls*{nipype} \emph{Interface} to \gls*{mbis},
+  three \gls*{nipype} \emph{Workflows} to implement the experiments
+  described in \autoref{sec:design} and a set of scripts in Python to automate the
+  execution of the workflows and presentation of results (figures and tables
+  included in this paper).
+To assess and compare results appropriately in terms of accuracy and 
+  robustness \citep{altman_measurement_1983}, we evaluate two families of
+  indicators: volume agreements and overlap indices.
+  
+\paragraph{Volume agreement}
+Volume agreement between the segmentation found and the ground-truth, or
+  between segmentations of corresponding time points, is a commonly used
+  benchmark.
+Volumes of the identified tissues are directly related to the total size
+  of the brain.
+Therefore, we provide here the ``\gls*{icv} fraction'' of each tissue
+  as the ratio of the measured volume over the total volume of
+  the whole-brain.
+
+\paragraph{Overlap indices\label{sec:evaluation_indices}}
+Overlap is a widely used indicator to assess segmentation results
+  with respect to a ground-truth \citep{crum_generalized_2006}.
+We use a \gls*{ev_fsi} derived from the fuzzy \gls*{ev_ji} \citep{crum_generalized_2006},
+  as in eq. \eqref{eq:si_index}.
+This fuzzy index definition takes the resulting \glspl*{tpm} as inputs,
+  and naturally extends the binary definition.
+We refer to the binary index as the \gls*{ev_si}, when computed on
+  \emph{hard} segmentations.
+Generally, the definition of \gls*{ev_ji} tends to favor classes with greater volume
+  when computing the average overlap of several classes.
+Thus, results reporting averages of overlap indices are compensated
+  for tissue volume in this paper.
+Additional indices are also provided:
+  \gls*{ev_tpf} that acts as a measure of sensitivity \eqref{eq:tpf_index};
+  \gls*{ev_ef} that expresses the over-segmentation \eqref{eq:ef_index};
+  and \gls*{ev_oc}, which is reported as an alternative to the 
+  \gls*{ev_si} \eqref{eq:oc_index}.
+\begin{align}
+fSI,SI&=\frac{2\,JI}{1+JI}\,, \label{eq:si_index} \\
+TPF&=\frac{TP}{TP+FN}\,, \label{eq:tpf_index} \\
+EF&=\frac{FP}{TP+FN}\,, \label{eq:ef_index} \\
+OC&=1-\frac{FP+FN}{TP}\,, \label{eq:oc_index}
+\end{align}
+where $TP$ stands for true positives, $FP$ for false positives, and $FN$ for false 
+negatives. We did not extend these measures to the probabilistic results, so they
+are only used for the assessment of the \emph{hard} segmentations.

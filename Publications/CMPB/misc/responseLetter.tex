@@ -1,0 +1,384 @@
+\documentclass{memoir}
+
+\usepackage[numbers,sort&compress]{natbib}
+
+\usepackage{xcite}
+\externalcitedocument{main}
+
+\usepackage[hidelinks]{hyperref}
+\usepackage{nameref}
+
+\newcounter{reviewpoint}
+\makeatletter
+\newenvironment{reviewpoint}%
+{\refstepcounter{reviewpoint}\par\medskip\vspace{3ex}\hrule\vspace{1.5ex}\par\noindent%
+   {\fontseries{b}\selectfont Comment \arabic{reviewpoint}:} \fontshape{it}\selectfont }
+{\label{com:\thereviewpoint}\par\medskip}
+\def\reviewpointautorefname{Comment}
+\makeatother
+
+
+\newcommand{\reply}{\par\fontshape{n}\selectfont \noindent \textbf{Reply}:\ }
+
+\begin{document}
+
+\section*{Response letter}
+
+
+We would like to thank the reviewer for his helpful comments, we prepared the revision accordingly.
+
+As a major change we completely reordered the sections to follow better the authors guidelines 
+ for the journal's article type \emph{Systems and programs}.
+Because of the large number of changes and rewrites, we refrained from marking individual changes. 
+Instead, we indicate where and how we addressed the specific points given by the reviewer in the 
+  point-by-point response given below.
+  
+We have also added the following references as suggested by the editorial reviewer:
+\citep{dang_validation_2013,roura_marga:_2014,delibasis_novel_2013,hodneland_automated_2012,ji_generalized_2012}.
+
+
+
+\subsection*{Reviewer 1:}
+\begin{reviewpoint}
+I am somewhat puzzled by the layout of the presentation, it does not appear to follow 
+  the conventional scheme of other articles in the journal, which makes it hard to 
+  read and to comprehend. 
+First, the introduction and the theory chapters are mixed with both previous knowledge 
+  as well as specific methods developed for this tool. 
+Moreover, the methods and algorithms used for MBIS were not separated from the theory. 
+In the fourth chapter (Evaluation experiments and results) results, methods and discussion 
+  is mixed and not clearly separated. I suggest rewriting the article with clearly 
+  separated ``Introduction'', ``Materials and Methods'' and ``Results''. 
+In the manner it is structured now it is very difficult to follow, and it is not clear what 
+  is theory and what is new contributions from the authors.
+\reply{We have re-structured the manuscript following the suggested separation resulting in the 
+  reorganization of the paper like follows: 
+\begin{enumerate}
+\item Introduction: it has been rewritten, and its changes will be covered in more depth with the responses 
+   to \autoref{com:4} and \autoref{com:5}.
+\item Computational methods and theory: we have now clearly separated theory and our contributions. 
+The contents of this section are also addressed in further detain with the replies to \autoref{com:2} and \autoref{com:14}.
+\item Software description: we removed parts of the text following the recommendations given 
+  in \autoref{com:8}, \autoref{com:9} and \autoref{com:19}. 
+This section is now structured as follows: 
+  \emph{(3.1) Existing software} this section was present in the former version of the manuscript under the introduction. 
+A minor correction has been done to answer \autoref{com:14}.
+  \emph{(3.2) Design considerations} introduces some software engineering foundations of the tool and describes 
+  the evaluation framework. 
+  We moved the discussion about reproducibility (see \autoref{com:5}) to this section, 
+    as it is also a design consideration for our tool.
+  \emph{(3.3) Evaluation framework} introduces the main properties of the validation package distributed along 
+  with MBIS, and the evaluation scores.
+\item Evaluation experiments and results: this section is the one that follows closest to the original manuscript. 
+  We changed the subsection titles to be more descriptive: \emph{4.1. Accuracy assessment and bias field correction}, 
+  \emph{4.2. Reproducibility evaluation}, and \emph{4.3. Suitability for large-scale studies}. 
+  As each of the three experiments is performed on a different database, the methods applied on each 
+    experiment can vary strongly, and the experiments presented here are intended to support the 
+    usefulness and accuracy of the tool, 
+    while also reporting \emph{Samples of typical system or program runs} (subsection iv of the Section II branch of CMPB). 
+  This is the reason for repeating the structure \emph{Data}-\emph{Methods}-\emph{Results} in each experiment, 
+    making these experiments easier to follow.
+\item Discussion: we shortened the discussion, as suggested by the general comment of the reviewer.
+\item Conclusion: no changes in this section
+\item Information Sharing Statement: contains the mode of availability and the hardware and software specifications.
+\item Appendices: In accordance with \autoref{com:12} we compiled all the information regarding MR sequences in a table, 
+    and we moved two algorithmic descriptions here to shorten sec. 2 (background). 
+   These appendices and some of the figures could be moved to a Supplemental Material for more briefness.
+\end{enumerate}}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+The article includes a large amount text that I do not really find relevant for presenting the work. 
+The 2nd chapter is very long and presents theory that I believe may already be available in previous 
+  articles as well as in book-chapters. 
+Try to shorten the theory, using references where necessary.
+\reply{Section 2 has been significantly shortened. 
+    Section 3 has been re-formulated as specified in the reply to Comment 1, and also 
+    cut down significantly.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Results and conclusions are missing from the abstract. Please modify.
+\reply{We have re-written the abstract to also provide results and conclusions.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+The introduction is very brief. 
+  Why is segmentation of WM, GM and CSF of interest, and what are the applications? 
+  Which is the clinical motivation for this work? 
+  Also references are missing for voxel-based morphometry, cortical thickness and brain tumor segmentation.
+\reply{
+We have re-written the introduction focusing on the clinical motivation.
+We have added more references for the brain tissue segmentation problem itself 
+\cite{kapur_segmentation_1996}, 
+tissue volume analyses \cite{mortamet_effects_2005,abe_sex_2010,taki_correlations_2011},
+cortical thickness \cite{fischl_measuring_2000,jones_three-dimensional_2000,macdonald_automated_2000}, and
+voxel-based morphometry \cite{wright_voxel-based_1995,paus_structural_1999,good_voxel-based_2001,ge_age-related_2002}.
+We have also separated research and clinical applications.
+The following text is now in the introduction regarding the clinical uses: 
+
+``\emph{Brain tissue segmentation is the standpoint for an endless
+  number of research studies concerning brain morphology,
+  such as quantitative analyses of tissue volumes 
+  \citep{mortamet_effects_2005,abe_sex_2010,taki_correlations_2011},
+  studies of cortical thickness \citep{fischl_measuring_2000,jones_three-dimensional_2000,
+  macdonald_automated_2000}, and voxel-based morphometry
+  \citep{wright_voxel-based_1995,paus_structural_1999,
+  good_voxel-based_2001,ge_age-related_2002}.
+In the clinical context, numerous studies have demonstrated the
+  potential use of brain tissue segmentation.
+The spatial location of these three key anatomical structures within
+  the brain is a requirement for clinical intervention \citep{kikinis_digital_1996} 
+  (e.g. radiotherapy planning, surgical planning, and image-guided intervention).
+Early applications addressed global conditions, for example \citep{tanabe_tissue_1997}
+  used semiautomated segmentation of MRI to assess the decrease in 
+  total brain tissue and cortical GM, and ventricles enlargement in Alzheimer's
+  Disease patients.
+An automated methodology is presented in \citep{hazlett_cortical_2006}
+  to find an abnormal enlargement of the GM volume in individuals
+  with autism.
+Focal conditions have been also studied including extra classes and
+  some other adaptations to pathologies, such as automated tumor delineation
+  \citep{prastawa_automatic_2003}, lesion detection and volume analyses
+  in multiple sclerosis \citep{collins_automated_2001,
+  zijdenbos_automatic_1998,zijdenbos_automatic_2002,van_leemput_automated_2001,
+  van_leemput_unifying_2003}, or white matter lesions associated
+  with age and several conditions like clinically silent stroke, higher
+  systolic blood pressure, etc. \citep{anbeek_probabilistic_2004}.
+The accurate and automated segmentation of tumor and
+  edema in multivariate brain images is an active field of interest in medical
+  image analysis, as illustrates the Challenge on \emph{Multimodal
+  Brain Tumor Segmentation} \citep{menze_challenge_2013} that has been 
+  held in conjunction with the last three editions of the 
+  MICCAI International Conference.}''}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+The last section of the introduction discuss the reproducibility, 
+  repeatability, robustness and sensitivity measures. 
+These are all terms that are defined differently among researchers. 
+In my opinion, this could be clarified and this section would possibly benefit from 
+  the additions of references to e.g. Bland and Altmans' work in this field.
+\reply{We have moved this discussion to the section 3.2 (p. 11, 2nd paragraph), 
+  where, in our opinion, it is more adequate. 
+We added references discussing reproducible research \cite{ibanez_open_2006,vandewalle_reproducible_2009} as suggested. 
+Now it is more clear when we use the term ``reproducibility'' regarding the replication of our experiments 
+  and results, referring to the robustness of the tool (Experiment 2), or with respect to the 
+  certainty of measurements (as the reviewer pointed out).
+We added a reference to the suggested work \cite{altman_measurement_1983} (p. 11, 1st paragraph of sec. 3.3), 
+  as it studies the problems regarding measurements and comparisons.
+}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+There are some spelling and grammatical errors, it may be beneficial to do some more editing 
+  of language and grammar (perhaps using the service of AnchorEnglish).
+\reply{The text has been properly revised by a professional service (AnchorEnglish, as suggested).}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+I do not understand what 'T1 (normalized intensity)' is (Fig. 1)? 
+T1 is a relaxation time in units of [s] or [ms]. 
+Same with the ordinate. 
+And what are the T1 and T2 "volumes"? 
+Which is the physical unit used (mL or L)? 
+And what is 'frequency'?
+\reply{This figure was included in section 2 to illustrate the fitting of a multivariate model. 
+From \autoref{com:16} we deduced that this figure was not fulfilling this intent, and we removed it. 
+In addition to removing the figure we shorten the section 2 as suggested in \autoref{com:2}.
+
+Regarding the actual MR sequences used in the study, we address the issue in \autoref{com:12}.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Also the 3rd chapter (Software description) seems to be excerpts from the user manual and it is 
+  therefore not necessary to include it in the article. 
+Furthermore, the command line parameters and exact notion to use the software, although 
+  useful when using the software, is not relevant for the presentation. 
+Therefore, I suggest that you remove chapter 3 completely.
+\reply{Almost all the contents of section 3 have been moved to the user manual and removed 
+  from the manuscript, keeping the structure of the proposed type of paper as described in the reply to Comment 1.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Additionally I suggest moving Appendix A to the software manual, and remove it from the manuscript.
+\reply{We removed the contents that appeared in Appendix A. 
+However, we inserted new contents in Appendix A: a data table specifying some details 
+  requested in \autoref{com:12}, and two algorithm descriptions that originally were placed in 
+  the section 2, and removed from there for briefness.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Please explain the column labels in the legend of Table 2.
+\reply{We have added a description for the column labels in Table 2, 
+  referencing the evaluation indices section where they are defined.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+The use of the term "multimodal" is very ambiguous as it suggests that several imaging 
+  modalities were used (such as CT, PET, SPECT etc). 
+This is not the case, and I therefore suggest using the term multivariate 
+  (or perhaps multispectral) instead. (See also Fig. 2.)
+\reply{Following the suggestion of the reviewer, depending on the context we replaced the term ``multimodal'' by 
+  either ``multivariate'' or ``multichannel''.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+The data that was used for input is extremely poorly described, and this is a major concern. 
+Did you use T1-, T2- and PD-weighted MRI data or T1, T2 and PD values as, 
+  I believe, is stated in some paragraphs? 
+The interpretation of your work is very different depending of what you have used as input 
+  to your segmentation. 
+The MRI-acquisition parameters are not reported etc, etc. 
+If relaxation weighting is used, different scanner settings would likely dramatically affect your results.
+\reply{All the sequences used are relaxation time weighted images, except for the magnetisation 
+  transfer (MT) used in Experiment 2 (section 4.2). 
+In order to accurately clarify this point, we added Table A.1, where we collected the information regarding 
+  each database from their publicly available repositories. 
+Each of these repositories offer different combinations of MR acquisitions schemes and one of the aims of our work 
+  is to show that -- compared to a single channel input -- by using a multivariant input a more reliable 
+  segmentation can be obtained regardless of the individual acquisition sequence parameters and used scanners.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Brain images should always be labeled with R/L. Please add.
+\reply{We added ``L'' and ``R'' labels to reference images in all figures that contained brain images (figs. 3, 4 and 5 in the current version;
+ figs. 6, 4 and 7, respectively, in the former version).}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Although Freesurfer is mentioned it was excluded because it is mainly "...a set of tools for reconstruction 
+of the brain's cortical surface...". Even though this is true, Freesurfer is in my view very 
+widely used also for brain tissue segmentation. 
+It may have been beneficial to also include Freesurfer in the discussions and also in Table 1.
+
+\reply{As suggested by the reviewer, we have included Freesurfer in Table 1, as well as in the text of subsection 3.1. 
+We agree on that Freesurfer is widely used for brain tissue segmentation \cite{fischl_whole_2002}, 
+  however the posterior probabilities of GM, WM, CSF tissue at every brain voxel are not provided. 
+We have included  some recalls and explanations  to the larger scope of Freesurfer, beyond the standalone problem of brain tissue segmentation in the appropriate location in section 3.1. }
+\end{reviewpoint}
+
+\begin{reviewpoint}
+The platforms for ATROPOS, NiftySeg and MBIS are, in Table 1, listed as platform-independent, this may be partially true. 
+  But surely there are some limitations? For one the platform must be supported by CMake?
+\reply{The reviewer is right. We specified this detail in subsection 3.1, Table 1 and 
+  the final \emph{Information Sharing Statement} section.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Is Fig. 1 part of the results?
+\reply{As it has been discussed in the reply to \autoref{com:7}, we remove the figure for not being 
+  descriptive enough and for briefness.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+on page 9 'Mahalanobis distance' is used for partial volume classification. 
+Why is this appropriate, what is the rationale that the partial volume fractions in the 
+  multiparametric space can be estimated this way?
+\reply{In a previous work \cite{cuadra_comparison_2005}
+  we reported that post-processing techniques using 
+  euclidean distances to the mean of each tissue can be competitive with 
+  other methodologies modeling mixtures of tissues. 
+On the basis of this work, and the fact that Mahalanobis distance is an
+  extension of the euclidean that also considers the variance (or covariance)
+  of distributions, we chose the Mahalanobis distance for being more appropriate
+  for multivariate experiments.
+This was not only the simplest solution to the problem, but it also worked satisfactorily 
+  as experiments 2, and (more specifically) 3 show.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Figure 2 is in need of a much more descriptive figure legend, e.g. what does the dashed line represent?
+\reply{Figure 2 (now changed to Figure 1, as the former Fig. 1 has been removed), has been re-generated with 
+  more descriptive labels. 
+Also, the caption has been reviewed, and the dashed line is explained as indicating optional inputs.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Figure 3 should be moved to the software manual, and deleted from the manuscript. 
+  Besides it does not tell me much.
+\reply{The figure has been removed from the manuscript.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+If Figs are mixed with the text (is this really acceptable in a manuscript?) you should modify the font in the figure legends in the same way as it is done in the journal.
+\reply{Many journals that use an electronic submission system now encourage mixing figures and text, hence we assumed that this 
+  would be okay for this submission. 
+ To separate figure legends better from the text we now moved the figures and tables 
+  to the end of the article. 
+We also changed the captions to follow the journal's recommendations for submission.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Fig. 9: What does it tell me? How can T1 be negative? How did you use MT? It is very puzzling how you have used MT and what you think it represents. How can you subtract 'modalities'?
+\reply{We have replaced every appearance of ``T1'', ``T2'' and ``PD'' by ``T1w'', ``T2w'' and ``PDw'', respectively, 
+  to reflect that they are relaxation weighted images. 
+We also describe more clearly in the corresponding figure caption (Fig. 7 in the latest version) that we coin, 
+  for instance, ``T1-T2-MT'' to refer to the experiment that used these three sequences to form 
+  the input multivariate vector. 
+This convention is now explicitly explained when used. 
+We do not perform mathematical operations to combine the input images, we rather ``stack'' them 
+  to get the multivariate input. 
+We have provided the detailed parameters of MRIs in Table A.1.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+Fig 8 is puzzling, what does the image represent? There are no R/L-labels.
+\reply{Figure 8a. has been removed from the manuscript. 
+It was aimed at demonstrating the arguably low quality of T2w images contained in the Kirby21 database. 
+For those images a multivariate segmentation is difficult or it completely fails (in the case of the FAST segmentation tool). 
+As the figure was not fulfilling these objectives, we decided to remove it from the manuscript. 
+Currently (Fig. 6 in the new version), it only contains the description of the influence of misalignment in segmentation. 
+Additionally, the figure is placed now under experiment 1 (sec. 4.1) as this study was conducted with the 
+  BrainWeb data to justify some of the pitfalls of the experiment 2. 
+The text has been updated accordingly, reflecting better the importance of intra-subject registration 
+  for multivariate registration.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+What are the numbers in Table 3 represent? How can you sub-tract "MT" from "T1"?? Units? Etc.
+\reply{As for \autoref{com:10}, descriptions of the evaluation indices have been included into the caption 
+  of the table. 
+Regarding the subtraction and units of MRI sequences, we have indicated new acronyms for relaxation-time weighted 
+  sequences and explicitly specified that the second column contains the MR sequences stacked to 
+  generate the multivariate input. 
+In no case it refers to subtractions of sequences.}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+What is "ICV rate"?? Rate? (Fig. 11)
+\reply{We agree with the reviewer on that the ``ICV rate'' concept was not correct. 
+We renamed it to ``ICV fraction'' in all the appearances and define it now in sec. 3.3 as 
+  the ``intra-cranial volume fraction'' of each tissue as the  
+   ratio of the measured volume over the total volume of the whole-brain.
+}
+\end{reviewpoint}
+
+\begin{reviewpoint}
+How would your segmentation method be able to handle global or focal pathologies in the brain? 
+Say a brain tumour, enlarged ventricles, atrophic tissue, or an MS-plaq
+\reply{We have extended the Introduction (sec. 1) to include previous studies of these pathologies, preserving 
+  the organization suggested by the reviewer (global/focal). 
+We also mention how MBIS can be used in these cases in the last paragraph of the Discussion (sec. 5.4):
+
+``\emph{The robustness issued by priors in atlas-based methods can be achieved
+  with multivariate segmentation without atlases, overcoming the drawbacks of
+  monospectral data-driven methods.
+As mentioned in sec. 1, atlas-free Bayesian segmentation methods
+  can be directly applied in the clinical assessment of several global pathologies (e.g.
+  atrophy, degeneration, enlarged ventricles, etc.) without modifications.
+In focal conditions (e.g. tumors, multiple sclerosis, white matter lesions, etc.),
+  the main requirement is the adaptation of model used in normal subjects to the
+  pathology or including outlier rejection schemes \citep{van_leemput_automated_2001}.
+In this context, MBIS is certainly a potential tool to be used given its 
+  availability and its flexibility for the needed adaptations.}''
+
+Therefore, our segmentation framework could support global pathologies like atrophy or degeneration or enlarged ventricles without need of any modification. However, in such conditions we would not promote the use of atlas priors during the segmentation process to avoid biasing results towards normal anatomy. We would rather encourage strictly data-driven approaches, to be able to capture the subtle changes of tissues in the above mentioned pathologies. Please note that similar tools to our segmentation framework have largely been used on those pathological cases.
+In order to use our segmentation method in other focal pathologies like tumors or multiple sclerosis, minor modifications should be included. Two different strategies could be applied in this case. First, by simply adding one or more tissue classes that would represent the pathological tissues (tumor, edema, etc) into our segmentation model (e.g. some contributions in \citep{menze_challenge_2013}). A second scenario could be to apply our segmentation method as it is but including an outlier rejection scheme as compared to healthy probabilistic atlases and consider the outlier points as lesion, similarly for the segmentation of MS-lesions in \citep{van_leemput_automated_2001}. }
+\end{reviewpoint}
+
+
+%\bibliographystyle{plainnat}
+%\bibliography{references}
+
+\end{document}

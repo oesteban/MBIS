@@ -1,0 +1,173 @@
+\section{Introduction}
+\label{sec:introduction}
+%
+Brain tissue segmentation from \gls*{mri} has been one of
+  the most challenging problems in computer vision
+  applied to biomedical image analysis \citep{kapur_segmentation_1996}.
+It is intended to provide precise delineations of \gls*{wm}, \gls*{gm}
+  and \gls*{csf} from acquired data.
+Brain tissue segmentation is the standpoint of processing schemes in an
+  endless number of research studies concerning brain morphology,
+  such as quantitative analyses of tissue volumes 
+  \citep{mortamet_effects_2005,abe_sex_2010,taki_correlations_2011},
+  studies of cortical thickness \citep{fischl_measuring_2000,jones_three-dimensional_2000,
+  macdonald_automated_2000}, and voxel-based morphometry
+  \citep{wright_voxel-based_1995,paus_structural_1999,
+  good_voxel-based_2001,ge_age-related_2002}.
+In a clinical context, numerous studies have demonstrated the
+  potential use of brain tissue segmentation.
+The spatial location of the above key anatomical structures within
+  the brain is a requirement for clinical intervention \citep{kikinis_digital_1996} 
+  (e.g. radiotherapy planning, surgical planning, and image-guided intervention).
+Early applications addressed global conditions; for example \citep{tanabe_tissue_1997}
+  used semiautomated segmentation of \gls*{mri} to assess the decrease in 
+  total brain tissue and cortical \gls*{gm}, and ventricle enlargement in Alzheimer's
+  Disease patients.
+Another study \citep{hazlett_cortical_2006} presented an automated methodology
+  to identify abnormal increase of the \gls*{gm} volume in individuals
+  with autism.
+Focal conditions have also been studied, including extra classes in clustering and
+  some other adaptations of methods to pathologies, such as automated tumor delineation
+  \citep{prastawa_automatic_2003}, lesion detection and volume analyses
+  in multiple sclerosis \citep{collins_automated_2001,
+  zijdenbos_automatic_1998,zijdenbos_automatic_2002,van_leemput_automated_2001,
+  van_leemput_unifying_2003}, and white matter lesions associated
+  with age and several conditions like clinically silent stroke, and higher
+  systolic blood pressure \citep{anbeek_probabilistic_2004}.
+The accurate and automated segmentation of tumor and
+  edema in multivariate brain images is an active field of interest in medical
+  image analysis, as illustrated by the Challenge on \emph{Multimodal
+  Brain Tumor Segmentation} \citep{menze_multimodal_2014} that has been 
+  held in conjunction with the last three sessions of the 
+  \gls*{miccai} International Conference.
+
+A survey on brain tissue segmentation techniques is reported elsewhere 
+  \citep{liew_current_2006}.
+Currently popular methodologies can be grouped into three main
+  families.
+\emph{Deformable model fitting} approaches
+  \citep{suri_leaking_2000,yushkevich_user-guided_2006,roura_marga:_2012,delibasis_novel_2013,dang_validation_2013}
+  are designed to evolve a number of initial contours
+  towards the intensity steps that occur at tissue
+  interfaces.
+\emph{Atlas-based methods} \citep{gorthi_active_2011}
+  use image registration
+  to perform a spatial mapping between the actual data
+  and an anatomical reference called an atlas.
+The atlas is \emph{prior} knowledge on the morphology
+  of data, and it generally comprehends a partition previously 
+  extracted by any other means (i.e. manual delineation,
+  averaging large populations, etc.).
+\emph{Clustering or classification} algorithms
+  \citep{van_leemput_automated_1999-1,ahmed_modified_2002,
+  vrooman_multi-spectral_2007,ji_generalized_2012}
+  search for a pixel-wise partition of the image 
+  data into a certain number of categories or clusters
+  (i.e. \gls*{wm}, \gls*{gm}, and \gls*{csf}).
+The partition can be \emph{hard} when each pixel belongs
+  to a single cluster or \emph{fuzzy},
+  assigning a probability of membership to
+  each category, which yields a so-called \gls*{tpm} 
+  per class.
+These three families of segmentation strategies have often been
+  combined to obtain enhanced results.
+For instance, deformable models can be initialized
+  using contours already located close to the solution 
+  sought using atlases.
+In clustering methods, \emph{priors} usually take the
+  form of precomputed \glspl*{tpm} derived from the atlas.
+These prior probability maps can be used just to initialize
+  the model, or be integrated throughout the model fitting
+  process \citep{ashburner_unified_2005}, simultaneously
+  improving the atlas registration at each iteration.
+The use of \emph{priors} presents two particular properties.
+On one hand, it generally aids the segmentation
+  process providing great stability and robustness.
+However, it is also suspected to bias results,
+  driving the solution somewhat close to the
+  population features that underlie the atlas
+  \citep{davatzikos_why_2004}.
+One further concern about the use of \emph{priors} is
+  posed by the need for a spatial mapping of the atlas
+  information to the actual data 
+  \citep{bookstein_voxel-based_2001,
+  ashburner_why_2001}, typically performed through a
+  registration process that may not be trivial or
+  flawless \citep{crum_zen_2003}.
+The unpredictable morphology found in pathologic brains
+  discourages the use of atlases extracted from healthy populations.
+Conversely, monospectral and strictly data-driven approaches are
+  usually very unreliable for pathologic subjects.
+For instance, a previous study \citep{prastawa_automatic_2003} updated a
+  standard atlas with an approximation of tumor locations for automated
+  clustering-based segmentation.
+On the other hand, multivariate approaches with outlier detection
+  \citep{van_leemput_automated_2001} have been proposed in the
+  case of multiple sclerosis derived lesions.
+
+The tool proposed in this work, named \gls*{mbis}, belongs to the sub-group of
+  Bayesian classification methods, which have been successfully
+  applied to brain tissue segmentation for the last 20 years
+  \citep{van_leemput_automated_1999-1}.
+Therefore, we will restrict the scope of this paper to this
+  sub-group of clustering methods.
+Given the maturity of the field, numerous evaluation studies have been reported
+  \citep{cuadra_comparison_2005,de_boer_accuracy_2010,roche_convergence_2011},
+  along with further refinements or extensions to the original methodologies
+  \citep{zhang_segmentation_2001,van_leemput_unifying_2003,
+  ashburner_unified_2005,fischl_whole_2002}.
+Existing applications of brain tissue segmentation generally
+  use \gls*{mri} as input data as a safe, noninvasive,
+  and highly precise modality.
+Early applications typically selected \acrfull*{t1}
+  MPRAGE sequences, mainly for their particularly appropriate
+  contrast between soft tissues, and for their wide availability.
+The current clinical setup provides a large number
+  of different sequences that can be used to
+  characterize each voxel of the brain with a vector of
+  intensities from each different \gls*{mri} scheme.
+In the last decade, we have witnessed an
+  explosion of the number of \gls*{mri} sequences widely available, enabling
+  the exploration of new observed features and requiring powerful multivariate
+  processing and analysis.
+Moreover, the vast amount of multi-site data
+  that research and clinical routines produce daily,
+  necessitates accurate and robust methods to
+  perform fully automated segmentation on heterogeneous 
+  (in the sense of multi-centric and/or multi-scanner) data
+  reliably.
+
+In this paper, we contribute to the field with \gls*{mbis}, an open-source 
+  software suite to perform multivariate segmentation on 
+  heterogeneous data.
+We also present a comprehensive evaluation framework,
+  containing several validation experiments on data
+  from three publicly-available resources.
+The first experiment demonstrates the accuracy of \gls*{mbis} segmenting
+  one synthetic dataset, in comparison to \gls*{fast}, a widely-used tool.
+The second experiment demonstrates the repeatability of results,
+  reporting the disagreement between segmentations of two
+  multivariate images of the same subject.
+These images correspond to 21 subjects who underwent a scan-rescan
+  session with the same \gls*{mri} protocol acquired twice.
+The third experiment proves the suitability of \gls*{mbis} on large-scale
+  segmentation studies.
+We demonstrate the successful application of \gls*{mbis} on a multi-site
+  resource of 584 subjects and observe the aging effects over
+  tissue volumes.
+
+The manuscript is structured as follows: In \autoref{sec:methods},
+  after introducing the theoretical background, we describe the
+  particular features of the method implemented by \gls*{mbis},
+  highlighting its methodological novelties.
+In \autoref{sec:software}, we review the existing software that can be
+  used to perform brain tissue segmentation, and compare it to \gls*{mbis}.
+We also present the design considerations that underlie
+  this work, and we describe the evaluation framework.
+In \autoref{sec:results}, we describe the specific details of each
+  experiment, illustrating the usefulness of \gls*{mbis}
+  and reporting the results of evaluation.
+Finally, we discuss in \autoref{sec:discussion} the three 
+  experiments, and envision the unique opportunity that
+  multivariate segmentation of the latest \gls*{mri} sequences
+  provides.

@@ -1,0 +1,44 @@
+\documentclass[border=0pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage[active,tightpage]{preview}
+\usepackage{graphicx}
+\usepackage[abs]{overpic}
+\usepackage{xcolor}
+
+\usepackage{geometry}
+
+\geometry{paperwidth=42cm}
+
+\begin{document}%
+\begin{preview}%
+	\bgroup
+	\def\arraystretch{0.1}
+	\setlength{\tabcolsep}{0pt}
+    \begin{tabular}{cccc}
+		%\includegraphics[width=0.25\textwidth]{fig04_00_T1_1mm_pn5_rf0_norm} &
+		%\includegraphics[width=0.25\textwidth]{fig04_01_T2_1mm_pn5_rf0_norm} &
+		%\includegraphics[width=0.25\textwidth]{fig04_02_PD_1mm_pn5_rf0_norm} &
+		%\tabularnewline
+		\begin{overpic}[unit=1mm,width=0.25\textwidth]{fig04_03_model_csf}
+%		\includegraphics[width=0.25\textwidth]{fig04_03_model_csf} 
+		\put(5,5){\scalebox{4}{{\color{white}\bfseries\sffamily L}}}
+		\put(58,5){\scalebox{4}{{\color{white}\bfseries\sffamily R}}}
+		\end{overpic}
+		&
+		\includegraphics[width=0.25\textwidth]{fig04_04_model_gm} &
+		\includegraphics[width=0.25\textwidth]{fig04_05_model_wm} &
+		\tabularnewline
+		\includegraphics[width=0.25\textwidth]{fig04_06_mbis_mrf_seg01} &
+		\includegraphics[width=0.25\textwidth]{fig04_07_mbis_mrf_seg02} &
+		\includegraphics[width=0.25\textwidth]{fig04_08_mbis_mrf_seg03} &
+		\includegraphics[width=0.25\textwidth]{fig04_12_mb_err} 
+		\tabularnewline
+		\includegraphics[width=0.25\textwidth]{fig04_09_fast} &
+		\includegraphics[width=0.25\textwidth]{fig04_10_fast} &
+		\includegraphics[width=0.25\textwidth]{fig04_11_fast} &
+		\includegraphics[width=0.25\textwidth]{fig04_13_fs_err} 
+		\tabularnewline
+	\end{tabular}
+    \egroup
+\end{preview}%
+\end{document}

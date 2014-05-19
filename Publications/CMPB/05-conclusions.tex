@@ -1,0 +1,174 @@
+\section{Discussion}
+\label{sec:discussion}
+We here present \gls*{mbis}, a segmentation tool particularly designed for
+  multivariate data, and based on the Bayesian framework.
+\Gls*{mbis} includes as main methodological novelties a new approach to 
+  bias correction and the \gls*{markov} model optimization using
+  \gls*{graph_cuts}.
+After reviewing the theoretical background and implementation details,
+  we reported an study evaluating the accuracy, with comparison to a widely
+  used similar tool (\gls*{fast}).
+Finally, we demonstrated the robustness of \gls*{mbis} on two publicly available
+  multivariate databases.
+
+\subsection{Accuracy performance}
+Both visual (\autoref{fig:brainweb_hard}, \autoref{fig:brainweb_fuzzy}) and
+  quantitative (\autoref{table:brainweb}) results showed the accuracy
+  of the tool.
+We recall that this claim was restricted to only one model from a synthetic brain
+  database.
+Many studies \citep{cuadra_comparison_2005,de_boer_accuracy_2010,ashburner_unified_2005,
+  klauschen_evaluation_2009} that evaluated the accuracy of monospectral segmentation
+  methods on \gls*{t1} \gls*{mri} have been reported.
+In general, these studies used the 20 normal models from the BrainWeb 
+  \citep{aubert-broche_twenty_2006}, evaluation tools \citep{shattuck_online_2009},
+  or a number of manually segmented studies as ground-truth.
+Nonetheless, the BrainWeb database only provides multivariate datasets for one
+  single model, manual segmentation is unaffordable in multivariate data, and
+  to our knowledge, there are no other evaluation resources of multivariate images.
+Thus, there is an important lack of realistic ground-truth data to test
+  multivariate segmentation of the brain.
+Additionally, quantitative assessment of accuracy can be discredited in two ways.
+First, synthetic models may not capture the unpredictable complexity of the real
+  data supplied by a healthy or diseased human brain (i.e. foldings, \gls*{mri} 
+  contrast properties).
+Second, manual segmentation of real data taken as gold-standard
+  is unaffordable, or at least, prone to inaccuracy and inconsistency
+  that are intrinsic to the methodology itself and the effort-demanding nature of manual
+  segmentation.
+Therefore, evaluation experiments based on this scheme are illustrative
+   but not definitive.
+As an informal corollary, we claim that once the segmentation accuracy has been 
+  assessed, it is equally or even more important to explore the challenging issue 
+  of repeatability of results.
+The reproducibility problem has become a main focus of interest 
+  \citep{landman_effects_2007,de_boer_accuracy_2010} in every medical imaging study 
+  because its absence has more negative consequences than inaccuracy itself.
+
+Besides the segmentation results, we presented a new application of a B-spline model for
+  the bias estimation.
+Built upon two existing methods, we combined the original bias estimation methodology
+  described previously \citep{van_leemput_automated_1999} with the bias field model proposed
+  in another study \citep{tustison_n4itk:_2010}.
+The B-spline model of \citeauthor{tustison_n4itk:_2010} has been proven to behave accurately
+  without a heavy computational cost, and it was naturally embedded within the \gls*{e_m} 
+  algorithm, as described in \autoref{sec:em}.
+Visual assessment of results was documented.
+Our methodology improved the bias estimated with respect to \gls*{fast} for all the channels.
+Moreover, multivariate segmentation performed robustly against the bias field.
+This is justified because the image channels share a unique distribution model that is used to
+  estimate the bias more effectively, regardless of the modality of the channel.
+Even though we observed that the bias correction can have a slightly negative impact
+  on final segmentation, we concluded that the explicit modeling of the bias field is
+  interesting as a multichannel bias field estimation technique itself.
+Most of bias correction methodologies (e.g. \cite{tustison_n4itk:_2010}) have been well tested on
+  \gls*{t1} images, but their behavior has not been studied in depth with other \gls*{mri} sequences.
+In addition, they do not exploit the advantages of the underlying distribution model shared
+  among pulse sequences.
+The fine tuning of the bias estimation strategy included in \gls*{mbis}, and the demonstration
+  of its expedience for the bias correction of multivariate images is a promising
+  line for forthcoming research.
+
+The robustness against bias field inhomogeneity exhibited by the multivariate segmentation technique
+  was an illustrative example for promoting the use of multivariate approaches in neuroimaging.
+
+\subsection{Repeatability analysis}
+We tested the robustness of the presented tool against the variabilities that are intrinsic,
+  mainly, to the acquisition.
+We used the \emph{Kirby21 database}, consisting of 21 scan-rescan sessions on 21 healthy subjects
+  with a multivariate protocol.
+We attempted a number of combinations of the most suitable modalities
+  (\gls*{t1}, \gls*{t2} and \gls*{mt}) for our experiment.
+The results highlighted three important limitations in the experiments:
+1) The quality of the image channels affects the sensitivity and robustness achieved in the 
+   experiment.
+2) Registration between observed variables ideally needs to be perfect.
+  We briefly studied this drawback within the first experiment and present the
+  impact in \autoref{fig:segmentation_pitfalls}.
+  Despite this deteriorating event, the results remained satisfactory.
+3) The measured increments of \acrfull*{icv} fractions strongly relied
+   on the brain mask obtained with the brain extraction tool.
+   Important differences in the volume of this mask
+   biased the quantitative results. Less impact should be
+   expected in the comparison between modality combinations.
+
+The intention was to replicate the robustness analyses proposed elsewhere
+  \citep{de_boer_accuracy_2010}.
+However, one of our design considerations was to present results
+  on publicly available data.
+As we use a different database, the results presented in this work are not
+  directly comparable to this previous study.
+  
+\subsection{Aptness of \gls*{mbis} in large-scale studies}
+We performed a large-scale study with 585 cases, from a freely available database.
+This experiment showed the expedience of \gls*{mbis} for the robust segmentation of large
+  volumes of data, producing sound results.
+Of note, our experiment was not intended to contribute to the field of study of brain aging,
+  but we proved that \gls*{mbis} can be used for this purpose in a large-scale study with
+  multivariate data (i.e. \citep{hodneland_automated_2012}).
+Further work may prove that this multivariate approach is better than traditional \gls*{t1}-based 
+  analysis, but in this case, we were restricted by the public availability of datasets.
+As addressed in \autoref{sec:potentials_multivariate} below, this paper is intended to open
+  the discussion of the potential benefits of multivariate analysis.
+By selecting the appropriate MR contrasts, and developing new models for the selected multivariate
+  distributions, the results of this last experiment should significantly outperform the classical
+  monospectral approach.
+
+\subsection{Potential of multivariate segmentation}
+\label{sec:potentials_multivariate}
+Besides the free availability of the presented tool and its evaluation,
+  the most interesting result was the potential robustness suggested by
+  multivariate segmentation.
+There are still some challenging issues in brain tissue segmentation, for
+  example the need for precise delineation of deep \gls*{gm} structures.
+Some efforts have been devoted to deep brain nuclei segmentation 
+  \citep{pohl_hierarchical_2007,tu_brain_2008}, but this
+  application was beyond the scope of this work, given that, in general, brain
+  tissue segmentation is not aimed at identifying the nuclei.
+Some studies more aligned with \gls*{mbis} foundations proposed new acquisition
+  sequences \citep{marques_mp2rage_2010,west_novel_2012} or the use of some 
+  other existing ones \citep{helms_improved_2009} to overcome this issue.
+Many of these sequences are acquired implicitly registered with other modalities,
+  while some are inherently multichannel, which necessitates fully supportive
+  multivariate segmentation.
+Consequently, the results presented in this paper using well-established modalities could
+  be improved by those obtained with the aforementioned emerging
+  modalities and multivariate sequences.
+
+The robustness issued by priors in atlas-based methods can be achieved
+  with multivariate segmentation without atlases, overcoming the drawbacks of
+  monospectral data-driven methods.
+As mentioned in \autoref{sec:introduction}, atlas-free Bayesian segmentation methods
+  can be directly applied in the clinical assessment of several global pathologies (e.g.
+  atrophy, degeneration, enlarged ventricles) without modifications.
+In focal conditions (e.g. tumors, multiple sclerosis, white matter lesions),
+  the main requirement is the adaptation of the model used in normal subjects to the
+  pathology, or including outlier rejection schemes \citep{van_leemput_automated_2001}.
+In this context, \gls*{mbis} is certainly a potentially useful tool, given its
+  availability and its flexibility for the necessary adaptations.
+
+
+\section{Conclusion}
+This work presented new and flexible segmentation software that is
+  intended as the basis for a large statistical clustering
+  suite for biomedical imaging.
+To this end, a first version of the \gls*{mbis} tool has been made publicly 
+  available, providing clinical researchers with a complete and functional
+ software tool and a complementary testing framework which includes the
+ presented experiments.
+We also presented \gls*{mbis} to encourage multivariate analysis of data,
+  as an emerging set of methodologies that should eventually
+  improve the repeatability of segmentation procedures.
+Complexity sources on multivariate statistical clustering are plentiful, with
+  numerous alternatives, such as the mixture model selection,
+  the \gls*{markov} model optimization, the bias field estimation 
+  and correction, and the use of atlases.
+The presented first release of \gls*{mbis} supports $n$-class segmentation using
+  the \gls*{e_m} algorithm, with a novel bias modeling approach, and
+  \gls*{markov} model regularization solved with \gls*{graph_cuts}
+  optimization.
+We evaluated the accuracy and robustness of \gls*{mbis} to demonstrate its usefulness.
+Finally, we understand that \gls*{mbis} will be useful for both computer vision as
+  well as clinical communities; we also hope that it will eventually encourage
+  investigators to enhance further the capabilities of this publicly available 
+  research tool.

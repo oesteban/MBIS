@@ -1,0 +1,105 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plain Cover Letter
+% LaTeX Template
+%
+% This template has been downloaded from:
+% http://www.latextemplates.com
+%
+% Original author:
+% Rensselaer Polytechnic Institute (http://www.rpi.edu/dept/arc/training/latex/resumes/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[11pt]{letter} % Default font size of the document, change to 10pt to fit more text
+
+\usepackage{newcent} % Default font is the New Century Schoolbook PostScript font 
+%\usepackage{helvet} % Uncomment this (while commenting the above line) to use the Helvetica font
+\usepackage{graphicx}
+\usepackage[all]{background}
+
+
+% Margins
+\topmargin=-0.5in % Moves the top of the document 1 inch above the default
+\textheight=8.5in % Total height of the text on the page before text goes on to the next page, this can be increased in a longer letter
+\oddsidemargin=-10pt % Position of the left margin, can be negative or positive if you want more or less room
+\textwidth=6.5in % Total width of the text, increase this if the left margin was decreased and vice-versa
+
+%\usepackage{showframe}
+\usepackage{tikz}
+
+\newcommand{\MyGraphicLogo}{% For imported graphic logo
+\begin{tikzpicture}[remember picture,overlay,yshift=-2cm, xshift=4cm]
+  \node at (0,0) {\includegraphics[height=1.80in]{../Figures/logocei}};
+ \end{tikzpicture}
+}
+
+\SetBgContents{\MyGraphicLogo}% Select included image
+\SetBgPosition{current page.north west}% Select location
+\SetBgOpacity{1.0}% Select opacity
+\SetBgAngle{0.0}% Select roation of logo
+\SetBgScale{1.0}% Select scale factor of logo
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	ADDRESSEE SECTION
+%----------------------------------------------------------------------------------------
+
+\begin{letter}{\textbf{Yu-Chuan (Jack) Li}, M.D., Ph.D., \\
+Taipei Medical University, 250 Wu-Hsin Street, \\ 
+Taipei 110 (Taiwan). \\ 
+E-mail: jaak88@gmail.com
+} 
+
+%----------------------------------------------------------------------------------------
+%	YOUR NAME & ADDRESS SECTION
+%----------------------------------------------------------------------------------------
+
+%\includegraphics[height=1.83in]{../Figures/logocei}
+
+
+\begin{flushright}
+\textbf{Oscar Esteban}, \\ % Your name
+Researcher at Biomedical Image Technologies (BIT), \\ 
+Universidad Polit\'ecnica de Madrid \\ 
+Av. Complutense, 30 - ETSI Telecomunicaci\'on C203 \\
+E-28040 Madrid (Spain) \\
+Tlf.: +34 915 495 700 ext.4234,\\
+E-mail: oesteban@die.upm.es % Your address and phone number
+\end{flushright} 
+\vfill
+
+\signature{Oscar Esteban} % Your name for the signature at the bottom
+
+%----------------------------------------------------------------------------------------
+%	LETTER CONTENT SECTION
+%----------------------------------------------------------------------------------------
+
+\opening{Dear Editor-in-Chief,}
+
+Please, find enclosed our manuscript, \emph{MBIS: Multivariate Bayesian Image Segmentation}, by O. Esteban et al.,
+which we would like to submit for publication in \emph{Section II: Systems and programs} of \emph{Computer Methods
+and Programs in Biomedicine}. This work describes a new open-source tool for biomedical image segmentation based
+on a widely-used probabilistic framework. We evaluated the tool on the brain tissue segmention application,
+performing three experiments on publicly available databases. We report the accuracy results, the repeatability,
+and the applicability in large-scale studies. Therefore, we believe that our work would appeal the readership of 
+Biomedical Image Analysis topics in \emph{Computer Methods and Programs in Biomedicine}.
+
+We confirm that this manuscript has not been published elsewhere and is not under consideration by another journal.
+
+We look forward to hearing from you at your earliest convenience.
+
+\closing{Sincerely yours,}
+
+
+%\encl{Curriculum vitae, employment form} % List your enclosed documents here, comment this out to get rid of the "encl:"
+
+%----------------------------------------------------------------------------------------
+
+\end{letter}
+
+\end{document}

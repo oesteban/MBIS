@@ -1,0 +1,24 @@
+\section*{Information Sharing Statement}
+\label{sec:iss}
+\paragraph{Mode of Availability}
+\gls*{mbis} source code is publicly available at \url{https://github.com/oesteban/MBIS}.
+Data used in this work are found in the mentioned databases.
+\paragraph{Requirements and specifications}
+The software uses the \emph{CMake} build system (\url{http://www.cmake.org}),
+  enabling compilation for all the platforms supported.
+\Gls*{mbis} requires the following libraries:
+  C++ and C++ Standard Library,
+  \emph{Boost} Program Options, Filesystem and System Libraries \url{http://www.boost.org}
+  \gls*{itk}-4.2  \url{http://www.itk.org/Wiki/ITK/Git/Download},
+  maxflow-3.0.2 (only for research purposes, \url{http://pub.ist.ac.at/~vnk/software.html}), or
+  maxflow-2.2.1 (GPL license, \url{http://pub.ist.ac.at/~vnk/software/maxflow-v2.21.src.tar.gz}).
+The evaluation framework has the following dependencies:
+  Python 2.7 (\url{http://www.python.org/}),
+  nibabel (\url{http://nipy.sourceforge.net/nibabel/}),
+  numpy (\url{http://numpy.scipy.org/}),
+  \gls*{nipype} (\url{http://nipy.sourceforge.net/nipype/index.html}),
+  matplotlib (\url{http://matplotlib.sourceforge.net/}), and
+  PyPR (\url{http://pypr.sourceforge.net/}).
+  
+\paragraph{License}
+This software is released under the \gls*{gpl} version 3  (\url{http://www.gnu.org/licenses/}). A copy of the \gls*{gpl} is distributed along with \gls*{mbis}.

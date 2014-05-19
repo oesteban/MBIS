@@ -1,0 +1,30 @@
+\documentclass[border=0pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage[active,tightpage]{preview}
+\usepackage{graphicx}
+\usepackage[abs]{overpic}
+\usepackage{xcolor}
+
+\usepackage{geometry}
+
+\geometry{paperwidth=42cm}
+
+\begin{document}%
+\begin{preview}%
+\vspace*{-\baselineskip}
+\bgroup
+\def\arraystretch{0.1}
+\setlength{\tabcolsep}{0pt}
+\begin{tabular}{@{}c}
+	\begin{overpic}[unit=1mm,width=1.0\textwidth]{fig07_ref_bias}
+	\put(108,90){\scalebox{4}{\bfseries\sffamily L}}
+	\put(171,90){\scalebox{4}{\bfseries\sffamily R}}
+	\put(192,90){\scalebox{4}{\bfseries\sffamily L}}
+	\put(254,90){\scalebox{4}{\bfseries\sffamily R}}
+	\end{overpic} \\
+	\includegraphics[width=1.0\textwidth]{fig07_ours_bias} \\
+	\includegraphics[width=1.0\textwidth]{fig07_fast_bias} \\
+\end{tabular}
+\egroup
+\end{preview}%
+\end{document}
